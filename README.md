@@ -1,3 +1,18 @@
 # NgeeAnnCityGame
+City-building web game for SPM Assignment 2
 
-Sprint 1: Display Main Menu
+## Build
+```
+npm install
+npm start
+```
+
+## Contributing
+**File structure:**
+```
+├── *.html
+├── assets/ # images
+├── css/
+|    └─ styles.css
+└── src/ # scripts
+```
