@@ -8,3 +8,34 @@
     background-color: #0f0424;
     color: #fff;
 }
+body {
+     text-align: center;
+     font-family: Arial, sans-serif;
+     background: #f0f0f0;
+}
+
+canvas {
+     border: 2px solid #333;
+     background-color: #fff;
+     image-rendering: pixelated;
+     margin-top: 10px;
+}
+.choices {
+     background: #fff;
+     padding: 10px 20px;
+     border-radius: 10px;
+     box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.choices img {
+    width: 64px;
+    height: 64px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    border-radius: 8px;
+    transition: border 0.3s;
+}
+
+.choices img.selected {
+    border: 3px solid #0077cc;
+}
