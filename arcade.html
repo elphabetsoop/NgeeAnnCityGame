@@ -6,13 +6,22 @@
      <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-     <h1>Ngee Ann City - Arcade Mode</h1>
-     <p>Coins: <span id="coinCount">16</span></p>
-     <canvas id="gameCanvas" width="640" height="640"></canvas>
-
+     <div class="main-wrapper">
+          <h1>Ngee Ann City - Arcade Mode</h1>
+          <p>Coins: <span id="coinCount">16</span></p>
+          <div class="game-info">
+               <p>Turn: <span id="turnCount">1</span></p>
+               <p>Score: <span id="scoreDisplay">0</span></p>
+               <button id="saveGameBtn" class="save-button">Save Game</button>
+               <button id="demolishBtn" class="demolish-button">Demolish Mode: OFF</button>
+          </div>
+          <div class="canvas-container">
+               <canvas id="gameCanvas" width="960" height="960"></canvas>
+          </div>
+          <h2>Choose a Building</h2>
+          <div id="buildingChoices" class="choices"></div>
+     </div>
      <script src="scripts/arcade.js"></script>
-     <h2>Choose a Building</h2>
-     <div id="buildingChoices" class="choices"></div>
 </body>
 </html>
 

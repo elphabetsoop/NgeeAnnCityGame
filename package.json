@@ -5,7 +5,7 @@
   "name": "ngeeanncitygame",
   "version": "1.0.0",
   "description": "City-building web game for SPM Assignment 2",
-  "main": "index.js",
+  "main": "index.html",
   "devDependencies": {
     "lite-server": "^2.6.1"
   },
