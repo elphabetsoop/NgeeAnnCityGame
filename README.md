@@ -21,8 +21,11 @@ npm start
 └── src/ # scripts
 ```
 ## References
-<a href="https://www.flaticon.com/free-icons/park" title="park icons">Park icons created by Freepik - Flaticon</a>
-<a href="https://www.flaticon.com/free-icons/residential" title="residential icons">Residential icons created by Freepik - Flaticon</a>
-<a href="https://www.flaticon.com/free-icons/road" title="road icons">Road icons created by Vectors Market - Flaticon</a>
-<a href="https://www.flaticon.com/free-icons/urban" title="urban icons">Urban icons created by smalllikeart - Flaticon</a>
-<a href="https://www.flaticon.com/free-icons/factory" title="factory icons">Factory icons created by Freepik - Flaticon</a>
+<ul>
+  <li><a href="https://www.flaticon.com/free-icons/park" title="park icons">Park icons</a> created by Freepik - Flaticon</li>
+  <li><a href="https://www.flaticon.com/free-icons/residential" title="residential icons">Residential icons</a> created by Freepik - Flaticon</li>
+  <li><a href="https://www.flaticon.com/free-icons/road" title="road icons">Road icons</a> created by Vectors Market - Flaticon</li>
+  <li><a href="https://www.flaticon.com/free-icons/urban" title="urban icons">Urban icons</a> created by smalllikeart - Flaticon</li>
+  <li><a href="https://www.flaticon.com/free-icons/factory" title="factory icons">Factory icons</a> created by Freepik - Flaticon</li>
+</ul>
+
