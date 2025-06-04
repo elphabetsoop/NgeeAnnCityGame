@@ -1,1 +1,62 @@
-test freeplay
+<!--This code is testing for the load saved game function (please remove if necessary execpt for the save game function)-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Free Game Page</title>
+</head>
+<body>
+
+    <h2>Game Page</h2>
+
+    <div>
+        <label>Score:</label>
+        <input type="number" id="scoreInput" value="0" />
+    </div>
+
+    <div>
+        <label>Inventory (comma-separated):</label>
+        <input type="text" id="inventoryInput" value="" />
+    </div>
+
+    <button onclick="saveGame()">Save Game</button>
+
+    <div style="margin-top: 20px;">
+        <h3>Current Game State</h3>
+        <div id="scoreDisplay">Score: 0</div>
+        <div id="inventoryDisplay">Inventory: none</div>
+    </div>
+
+    <script src="load-save-game.js"></script>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const shouldLoad = urlParams.get('load');
+
+        if (shouldLoad === 'true') {
+            loadSavedGame();
+        }
+
+        // Save game with updated inputs
+        function saveGame() {
+            const score = parseInt(document.getElementById('scoreInput').value);
+            const inventoryText = document.getElementById('inventoryInput').value;
+            const inventory = inventoryText.split(',').map(item => item.trim()).filter(item => item);
+
+            const gameState = {
+                playerPosition: { x: 100, y: 200 }, // sample fixed position
+                score: score,
+                inventory: inventory
+            };
+
+            localStorage.setItem('myGameSave', JSON.stringify(gameState));
+            alert('Game saved!');
+
+            // Update displays
+            document.getElementById('scoreDisplay').textContent = `Score: ${score}`;
+            document.getElementById('inventoryDisplay').textContent = `Inventory: ${inventory.join(', ')}`;
+        }
+    </script>
+
+</body>
+</html>
