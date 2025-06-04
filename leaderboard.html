@@ -1,1 +1,66 @@
-test leaderboard
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="leaderboard.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <title>Leaderboard</title>
+  <style>
+    body {
+      font-family: 'Orbitron', sans-serif;
+      text-align: center;
+      padding: 2em;
+    }
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+      width: 80%;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+  
+<body>
+    <button class="exit-button" onclick="goToMainMenu()">Back</button>
+    <h1 style="color: black">Game Leaderboard</h1>
+
+    <!-- Toggle Buttons -->
+    <div class="leaderboard-toggle">
+    <button onclick="showLeaderboard('arcade')">Arcade</button>
+    <button onclick="showLeaderboard('freeplay')">Freeplay</button>
+    </div>
+
+    <div class="leaderboard-container">
+        <!-- Arcade Leaderboard -->
+        <table id="arcade-leaderboard" class="leaderboard-table">
+        <thead>
+            <tr><th>Rank</th><th>Name</th><th>Score</th></tr>
+        </thead>
+        <tbody id="arcade-body"></tbody>
+        </table>
+
+        <!-- Freeplay Leaderboard -->
+        <table id="freeplay-leaderboard" class="leaderboard-table" style="display: none;">
+        <thead>
+            <tr><th>Rank</th><th>Name</th><th>Score</th></tr>
+        </thead>
+        <tbody id="freeplay-body"></tbody>
+        </table>
+    </div>
+  <script src="leaderboard.js"></script>
+</body>
+
+<script>
+  function goToMainMenu() {
+    window.location.href = 'index.html'; // Change to your actual main menu file
+  }
+</script>
+
+</html>
