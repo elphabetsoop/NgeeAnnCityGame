@@ -1,260 +1,206 @@
-﻿// Adjust canvas and tile size for better visibility
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-ctx.imageSmoothingEnabled = true;
+﻿// arcade.js
 
-const TILE_SIZE = 48;
-const GRID_SIZE = 20;
-canvas.width = TILE_SIZE * GRID_SIZE;
-canvas.height = TILE_SIZE * GRID_SIZE;
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const tileSize = 48;
+const gridSize = 20;
+const canvasSize = tileSize * gridSize;
 
-let turn = 1;
+canvas.width = canvasSize;
+canvas.height = canvasSize;
+
+let gameBoard = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
+let coinCount = 16;
+let turnCount = 1;
 let score = 0;
+let demolishMode = false;
+let selectedBuilding = null;
 
-let isDemolishMode = false;
+const buildings = ["Residential", "Industry", "Commercial", "Park", "Road"];
+const buildingImages = {};
 
-let coins = 16;
-const grid = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(null));
+function loadImages() {
+     buildings.forEach(name => {
+          const img = new Image();
+          img.src = `../assets/${name.toLowerCase()}.png`;
+          buildingImages[name] = img;
+     });
+}
 
-const images = {};
-const buildings = ['R', 'I', 'C', 'O', '*'];
-let selectedBuildings = getRandomBuildings();
-let selectedChoice = selectedBuildings[0];
-
-
-//// Create and style the Exit button
-const exitBtn = document.createElement('button');
-exitBtn.textContent = 'Exit to Main Menu';
-exitBtn.className = 'exit-button';
-exitBtn.onclick = () => window.location.href = 'index.html';
-document.body.appendChild(exitBtn);
-
-
-
-// Load images
-const imagePaths = {
-     'R': 'assets/residential.png',
-     'I': 'assets/industry.png',
-     'C': 'assets/commercial.png',
-     'O': 'assets/park.png',
-     '*': 'assets/road.png'
+function startNewGame() {
+     gameBoard = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
+     coinCount = 16;
+     turnCount = 1;
+     score = 0;
+     demolishMode = false;
+     selectedBuilding = null;
+     document.getElementById("coinCount").textContent = coinCount;
+     document.getElementById("turnCount").textContent = turnCount;
+     document.getElementById("scoreDisplay").textContent = score;
+     generateBuildingChoices();
+     drawBoard();
+}
+const buildingDescriptions = {
+     Residential: "Residential:.",
+     Industry: "Industry:.",
+     Commercial: "Commercial:.",
+     Park: "Park:.dawda",
+     Road: "Road:."
 };
 
-
-
-let imagesLoaded = 0;
-const totalImages = Object.keys(imagePaths).length;
-
-for (let key in imagePaths) {
-     const img = new Image();
-     img.src = imagePaths[key];
-     img.onload = () => {
-          imagesLoaded++;
-          if (imagesLoaded === totalImages) {
-               drawGrid();
-               displayChoices();
-          }
-     };
-     images[key] = img;
-}
-
-function getRandomBuildings() {
-     const shuffled = [...buildings].sort(() => 0.5 - Math.random());
-     return shuffled.slice(0, 2);
-}
-
-function drawGrid() {
-     ctx.clearRect(0, 0, canvas.width, canvas.height);
-     for (let y = 0; y < GRID_SIZE; y++) {
-          for (let x = 0; x < GRID_SIZE; x++) {
-               ctx.strokeStyle = '#999'; // Darker grid lines for visibility
-               ctx.strokeRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-               const cell = grid[y][x];
-               if (cell && images[cell]) {
-                    ctx.drawImage(images[cell], x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-               }
-          }
+function getTooltipText(building) {
+     switch (building) {
+          case "Residential":
+               return `Residential: 
+Scores 1 if next to Industry.
+Otherwise, +1 per adjacent Residential or Commercial, +2 per Park.`;
+          case "Industry":
+               return `Industry: 
++1 per Industry in city.
+Generates 1 coin per adjacent Residential.`;
+          case "Commercial":
+               return `Commercial: 
++1 per adjacent Commercial.
+Generates 1 coin per adjacent Residential.`;
+          case "Park":
+               return `Park: 
++1 per adjacent Park.`;
+          case "Road":
+               return `Road: 
++1 per connected Road in same row.`;
+          default:
+               return "";
      }
 }
 
-function allowDrop(ev) {
-     ev.preventDefault();
-}
-
-function drag(ev) {
-     ev.dataTransfer.setData("type", ev.target.dataset.type);
-}
-
-canvas.addEventListener('dragover', allowDrop);
-canvas.addEventListener('drop', function (e) {
-     e.preventDefault();
-     if (coins <= 0) return;
-
-     const rect = canvas.getBoundingClientRect();
-     const x = Math.floor((e.clientX - rect.left) / TILE_SIZE);
-     const y = Math.floor((e.clientY - rect.top) / TILE_SIZE);
-
-     if (!grid[y][x]) {
-          const isFirstBuilding = grid.flat().every(cell => cell === null);
-          if (isFirstBuilding || isConnected(x, y)) {
-               const toBuild = e.dataTransfer.getData("type");
-               grid[y][x] = toBuild;
-               coins--;
-               turn++;
-               score = calculateScore(true); // Pass true to suppress alert
-               updateGameStats();
-               selectedBuildings = getRandomBuildings();
-               selectedChoice = selectedBuildings[0];
-               drawGrid();
-               displayChoices();
-          }
+function generateBuildingChoices() {
+     const choiceContainer = document.getElementById("buildingChoices");
+     choiceContainer.innerHTML = "";
+     const choices = [];
+     while (choices.length < 2) {
+          const b = buildings[Math.floor(Math.random() * buildings.length)];
+          choices.push(b);
      }
-});
-
-function displayChoices() {
-     const container = document.getElementById('buildingChoices');
-     container.innerHTML = '';
-
-     selectedBuildings.forEach((type) => {
-          const img = document.createElement('img');
-          img.src = imagePaths[type];
-          img.dataset.type = type;
+     choices.forEach(building => {
+          const div = document.createElement("div");
+          div.classList.add("tooltip-container");
+          const img = document.createElement("img");
+          img.src = `../assets/${building.toLowerCase()}.png`;
+          img.alt = building;
           img.draggable = true;
-          img.ondragstart = drag;
-
-          if (type === selectedChoice) {
-               img.classList.add('selected');
-          }
-
-          img.addEventListener('click', () => {
-               selectedChoice = type;
-               displayChoices();
+          img.addEventListener("dragstart", e => {
+               e.dataTransfer.setData("text/plain", building);
+          });
+          img.addEventListener("click", () => {
+               document.querySelectorAll(".choices img").forEach(el => el.classList.remove("selected"));
+               img.classList.add("selected");
+               selectedBuilding = building;
           });
 
-          container.appendChild(img);
+          const tooltip = document.createElement("div");
+          tooltip.classList.add("tooltip-text");
+          tooltip.innerText = getTooltipText(building);
+
+          div.appendChild(img);
+          div.appendChild(tooltip);
+          choiceContainer.appendChild(div);
      });
 }
 
-function isConnected(x, y) {
-     const directions = [
-          [0, -1], [0, 1], [-1, 0], [1, 0]
-     ];
-     return directions.some(([dx, dy]) => {
-          const nx = x + dx;
-          const ny = y + dy;
-          return nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE && grid[ny][nx] !== null;
-     });
-}
-
-function getAdjacentTypes(x, y) {
-     const types = [];
-     const directions = [[0, -1], [0, 1], [-1, 0], [1, 0]];
-
-     directions.forEach(([dx, dy]) => {
-          const nx = x + dx;
-          const ny = y + dy;
-          if (nx >= 0 && ny >= 0 && nx < GRID_SIZE && ny < GRID_SIZE) {
-               if (grid[ny][nx]) types.push(grid[ny][nx]);
-          }
-     });
-
-     return types;
-}
-
-function getConnectedRoadLength(x, y) {
-     if (grid[y][x] !== '*') return 0;
-
-     let length = 1;
-     for (let i = x - 1; i >= 0 && grid[y][i] === '*'; i--) length++;
-     for (let i = x + 1; i < GRID_SIZE && grid[y][i] === '*'; i++) length++;
-
-     return length;
-}
-
-function calculateScore(silent = false) {
-     let total = 0;
-
-     for (let y = 0; y < GRID_SIZE; y++) {
-          for (let x = 0; x < GRID_SIZE; x++) {
-               const type = grid[y][x];
-               if (!type) continue;
-
-               const neighbors = getAdjacentTypes(x, y);
-
-               switch (type) {
-                    case 'R':
-                         if (neighbors.includes('I')) {
-                              total += 1;
-                         } else {
-                              total += neighbors.filter(n => n === 'R' || n === 'C').length;
-                              total += 2 * neighbors.filter(n => n === 'O').length;
-                         }
-                         break;
-                    case 'I':
-                         total += 1;
-                         break;
-                    case 'C':
-                         total += neighbors.filter(n => n === 'C').length;
-                         break;
-                    case 'O':
-                         total += neighbors.filter(n => n === 'O').length;
-                         break;
-                    case '*':
-                         total += getConnectedRoadLength(x, y);
-                         break;
+function drawBoard() {
+     ctx.clearRect(0, 0, canvasSize, canvasSize);
+     for (let y = 0; y < gridSize; y++) {
+          for (let x = 0; x < gridSize; x++) {
+               ctx.strokeStyle = "#ccc";
+               ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+               const cell = gameBoard[y][x];
+               if (cell) {
+                    ctx.drawImage(buildingImages[cell], x * tileSize, y * tileSize, tileSize, tileSize);
                }
           }
      }
-
-     if (!silent) alert("Your final score: " + total);
-     return total;
 }
 
-function updateGameStats() {
-     document.getElementById('coinCount').innerText = coins;
-     document.getElementById('turnCount').innerText = turn;
-     document.getElementById('scoreDisplay').innerText = score;
-}
-
-document.getElementById('saveGameBtn').addEventListener('click', () => {
-     const gameState = {
-          coins,
-          turn,
-          score,
-          grid,
-     };
-
-     localStorage.setItem('ngeeAnnCitySave', JSON.stringify(gameState));
-     alert('Game saved!');
-});
-
-const demolishBtn = document.getElementById('demolishBtn');
-demolishBtn.addEventListener('click', () => {
-     isDemolishMode = !isDemolishMode;
-     demolishBtn.classList.toggle('active', isDemolishMode);
-     demolishBtn.textContent = `Demolish Mode: ${isDemolishMode ? 'ON' : 'OFF'}`;
-});
-
-canvas.addEventListener('click', function (e) {
-     if (!isDemolishMode) return;
-
+canvas.addEventListener("click", e => {
      const rect = canvas.getBoundingClientRect();
-     const x = Math.floor((e.clientX - rect.left) / TILE_SIZE);
-     const y = Math.floor((e.clientY - rect.top) / TILE_SIZE);
+     const x = Math.floor((e.clientX - rect.left) / tileSize);
+     const y = Math.floor((e.clientY - rect.top) / tileSize);
 
-     if (grid[y][x]) {
-          grid[y][x] = null;
-          coins--;
-          turn++;
-          score = calculateScore(true);
-          updateGameStats();
-          drawGrid();
+     if (demolishMode) {
+          if (gameBoard[y][x] && coinCount > 0) {
+               gameBoard[y][x] = null;
+               coinCount--;
+               document.getElementById("coinCount").textContent = coinCount;
+               drawBoard();
+          }
+          return;
+     }
+
+     if (!selectedBuilding || gameBoard[y][x]) return;
+     placeBuilding(x, y, selectedBuilding);
+});
+
+canvas.addEventListener("dragover", e => e.preventDefault());
+canvas.addEventListener("drop", e => {
+     e.preventDefault();
+     const rect = canvas.getBoundingClientRect();
+     const x = Math.floor((e.clientX - rect.left) / tileSize);
+     const y = Math.floor((e.clientY - rect.top) / tileSize);
+     const droppedBuilding = e.dataTransfer.getData("text/plain");
+     if (!gameBoard[y][x]) {
+          placeBuilding(x, y, droppedBuilding);
+     }
+});
+
+function placeBuilding(x, y, building) {
+     if (coinCount <= 0) return;
+     gameBoard[y][x] = building;
+     coinCount--;
+     turnCount++;
+     selectedBuilding = null;
+     document.querySelectorAll(".choices img").forEach(el => el.classList.remove("selected"));
+     document.getElementById("coinCount").textContent = coinCount;
+     document.getElementById("turnCount").textContent = turnCount;
+     document.getElementById("scoreDisplay").textContent = score;
+     generateBuildingChoices();
+     drawBoard();
+}
+
+document.getElementById("saveGameBtn").addEventListener("click", () => {
+     localStorage.setItem("ngeeAnnGameState", JSON.stringify({ gameBoard, coinCount, turnCount, score }));
+});
+
+document.getElementById("demolishBtn").addEventListener("click", () => {
+     demolishMode = !demolishMode;
+     const btn = document.getElementById("demolishBtn");
+     btn.classList.toggle("active", demolishMode);
+     btn.textContent = `Demolish Mode: ${demolishMode ? "ON" : "OFF"}`;
+
+     if (demolishMode) {
+          document.getElementById("demolishModal").style.display = "flex";
      }
 });
 
 
+document.getElementById("closeDemolishModal").addEventListener("click", () => {
+     document.getElementById("demolishModal").style.display = "none";
+});
+
+loadImages();
+startNewGame();
 
 
+// Exit to Main Menu Modal
+document.getElementById("exitBtn").addEventListener("click", (e) => {
+     e.preventDefault();
+     document.getElementById("exitModal").style.display = "flex";
+});
 
+document.getElementById("cancelExit").addEventListener("click", () => {
+     document.getElementById("exitModal").style.display = "none";
+});
 
+document.getElementById("confirmExit").addEventListener("click", () => {
+     window.location.href = "index.html";
+});
 
