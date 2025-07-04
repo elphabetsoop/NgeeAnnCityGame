@@ -20,6 +20,7 @@ npm start
 |    └─ load-save-game.js
 └── src/ # scripts
 ```
+
 ## References
 <ul>
   <li><a href="https://www.flaticon.com/free-icons/park" title="park icons">Park icons</a> created by Freepik - Flaticon</li>

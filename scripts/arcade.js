@@ -1,5 +1,5 @@
 ﻿// arcade.js
-
+import { calculateScore } from "./scoring.js";
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const tileSize = 48;
@@ -155,8 +155,18 @@ canvas.addEventListener("drop", e => {
 function placeBuilding(x, y, building) {
      if (coinCount <= 0) return;
      gameBoard[y][x] = building;
+
+     console.log(`Placing ${building} at (${x}, ${y})`);
+
      coinCount--;
      turnCount++;
+     
+     const result = calculateScore(gameBoard, score, coinCount, x, y, building);
+     score = result.score;
+     coinCount = result.coinCount;
+     
+     console.log(`Score after placing ${building} at (${x}, ${y}): ${score}`);
+
      selectedBuilding = null;
      document.querySelectorAll(".choices img").forEach(el => el.classList.remove("selected"));
      document.getElementById("coinCount").textContent = coinCount;
