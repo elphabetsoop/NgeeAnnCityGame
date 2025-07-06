@@ -141,7 +141,7 @@ function createBuildingStatsOverlay(x, y, building) {
      overlay.style.top = (canvasRect.top + window.scrollY + y * tileSize) + "px";
      overlay.style.width = tileSize + "px";
      overlay.style.height = tileSize + "px";
-     overlay.style.pointerEvents = "auto";
+     overlay.style.pointerEvents = "none";
      overlay.style.zIndex = "10";
      
      const tooltip = document.createElement("div");
