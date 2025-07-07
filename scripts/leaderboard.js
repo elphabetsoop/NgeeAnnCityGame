@@ -49,5 +49,5 @@ populateLeaderboard(arcadeData, "arcade-body");
 populateLeaderboard(freeplayData, "freeplay-body");
 
 function goToMainMenu() {
-    window.location.href = 'index.html'; // Change to your actual main menu file
+    window.location.href = 'index.html';
 }
