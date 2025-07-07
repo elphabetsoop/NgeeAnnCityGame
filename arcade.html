@@ -6,28 +6,43 @@
      <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
      <link rel="stylesheet" href="css/styles.css">
 </head>
-<!-- Demolish Reminder Modal -->
-<div id="demolishModal" class="custom-modal">
-     <div class="custom-modal-content">
-          <p>🚧 <strong>Demolish Mode is ON</strong></p>
-          <p>Each demolished building will cost <strong>1 coin</strong>.</p>
-          <button id="closeDemolishModal">OK</button>
-     </div>
-</div>
-
-<!-- Exit Confirmation Modal -->
-<div id="exitModal" class="custom-modal">
-     <div class="custom-modal-content">
-          <p>⚠️ <strong>Are you sure you want to exit to the main menu?</strong></p>
-          <p>Your progress will be lost unless saved.</p>
-          <div class="modal-actions">
-               <button id="cancelExit">Cancel</button>
-               <button id="confirmExit">Exit</button>
+<body>
+     <!-- Game Over Modal -->
+     <div id="gameOverModal" class="custom-modal hidden">
+          <div class="custom-modal-content">
+               <h2>🏁 Game Over</h2>
+               <p>Your final score: <span id="finalScore">0</span></p>
+               <p>Total turns taken: <span id="finalTurns">0</span></p>
+               <div id="buildingStatsSummary" style="margin: 15px 0; text-align: left;"></div>
+               <div class="modal-actions">
+                    <button onclick="window.location.href='arcade.html'">🔄 Play Again</button>
+                    <button onclick="window.location.href='index.html'" class="btn-custom">🏠 Main Menu</button>
+               </div>
           </div>
      </div>
-</div>
 
-<body>
+     <!-- Demolish Reminder Modal -->
+     <div id="demolishModal" class="custom-modal">
+          <div class="custom-modal-content">
+               <p>🚧 <strong>Demolish Mode is ON</strong></p>
+               <p>Each demolished building will cost <strong>1 coin</strong>.</p>
+               <button id="closeDemolishModal">OK</button>
+          </div>
+     </div>
+
+     <!-- Exit Confirmation Modal -->
+     <div id="exitModal" class="custom-modal">
+          <div class="custom-modal-content">
+               <p>⚠️ <strong>Are you sure you want to exit to the main menu?</strong></p>
+               <p>Your progress will be lost unless saved.</p>
+               <div class="modal-actions">
+                    <button id="cancelExit">Cancel</button>
+                    <button id="confirmExit">Exit</button>
+               </div>
+          </div>
+     </div>
+
+     <!-- Main Game Interface -->
      <button id="exitBtn" class="exit-button">Exit to Main Menu</button>
      <div class="main-wrapper">
           <h1>Ngee Ann City - Arcade Mode</h1>
@@ -44,9 +59,11 @@
           <h2>Choose a Building</h2>
           <div id="buildingChoices" class="choices"></div>
      </div>
+
      <script type="module" src="scripts/arcade.js"></script>
 </body>
 </html>
+
 
 
 

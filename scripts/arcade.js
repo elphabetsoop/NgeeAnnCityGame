@@ -19,6 +19,43 @@ let selectedBuilding = null;
 const buildings = ["Residential", "Industry", "Commercial", "Park", "Road"];
 const buildingImages = {};
 
+
+function checkGameOver() {
+     console.log("Coins:", coinCount);
+     if (coinCount <= 0) {
+          console.log("Game Over triggered");
+
+          document.getElementById('finalScore').innerText = score;
+          document.getElementById('finalTurns').innerText = turnCount;
+
+          // Calculate building stats
+          const stats = {};
+          for (const row of gameBoard) {
+               for (const cell of row) {
+                    if (cell) {
+                         const type = typeof cell === "string" ? cell : cell.type;
+                         stats[type] = (stats[type] || 0) + 1;
+                    }
+               }
+          }
+
+          // Generate summary HTML
+          const summaryContainer = document.getElementById("buildingStatsSummary");
+          summaryContainer.innerHTML = "<strong>Buildings Placed:</strong><ul style='padding-left: 20px;'>";
+          for (const [type, count] of Object.entries(stats)) {
+               summaryContainer.innerHTML += `<li>${type}: ${count}</li>`;
+          }
+          summaryContainer.innerHTML += "</ul>";
+
+          const modal = document.getElementById('gameOverModal');
+          modal.classList.remove('hidden');
+          modal.style.display = 'flex'; // Ensure visibility
+     }
+}
+
+
+
+
 function loadImages() {
      buildings.forEach(name => {
           const img = new Image();
@@ -167,6 +204,7 @@ canvas.addEventListener("click", e => {
                coinCount--;
                document.getElementById("coinCount").textContent = coinCount;
                drawBoard();
+               checkGameOver()
           }
           return;
      }
@@ -205,6 +243,7 @@ function placeBuilding(x, y, building) {
      score = result.score;
      coinCount = result.coinCount;
      
+     
      console.log(`Score after placing ${building} at (${x}, ${y}): ${score}`);
 
      selectedBuilding = null;
@@ -214,7 +253,9 @@ function placeBuilding(x, y, building) {
      document.getElementById("scoreDisplay").textContent = score;
      generateBuildingChoices();
      drawBoard();
+     checkGameOver()
 }
+
 
 document.getElementById("saveGameBtn").addEventListener("click", () => {
      localStorage.setItem("ngeeAnnGameState", JSON.stringify({ gameBoard, coinCount, turnCount, score }));
@@ -236,8 +277,10 @@ document.getElementById("closeDemolishModal").addEventListener("click", () => {
      document.getElementById("demolishModal").style.display = "none";
 });
 
+
 loadImages();
 startNewGame();
+
 
 
 // Exit to Main Menu Modal
