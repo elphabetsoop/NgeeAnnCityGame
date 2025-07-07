@@ -1,5 +1,5 @@
 ﻿// arcade.js
-
+import { calculateScore } from "./scoring.js";
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const tileSize = 48;
@@ -109,16 +109,51 @@ function generateBuildingChoices() {
 
 function drawBoard() {
      ctx.clearRect(0, 0, canvasSize, canvasSize);
+     
+     const existingOverlays = document.querySelectorAll('.building-stat-overlay');
+     existingOverlays.forEach(overlay => overlay.remove());
+     
      for (let y = 0; y < gridSize; y++) {
           for (let x = 0; x < gridSize; x++) {
                ctx.strokeStyle = "#ccc";
                ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
                const cell = gameBoard[y][x];
                if (cell) {
-                    ctx.drawImage(buildingImages[cell], x * tileSize, y * tileSize, tileSize, tileSize);
+                    const buildingType = typeof cell === 'string' ? cell : cell.type;
+                    ctx.drawImage(buildingImages[buildingType], x * tileSize, y * tileSize, tileSize, tileSize);
+
+                    // Only create overlay if cell is an object with stats
+                    if (typeof cell === 'object' && cell.buildingStats) {
+                         createBuildingStatsOverlay(x, y, cell);
+                    }
                }
           }
      }
+}
+
+function createBuildingStatsOverlay(x, y, building) {
+     const canvasRect = canvas.getBoundingClientRect();
+     
+     const overlay = document.createElement("div");
+     overlay.classList.add("building-stat-overlay", "tooltip-container");
+     overlay.style.position = "absolute";
+     overlay.style.left = (canvasRect.left + window.scrollX + x * tileSize) + "px";
+     overlay.style.top = (canvasRect.top + window.scrollY + y * tileSize) + "px";
+     overlay.style.width = tileSize + "px";
+     overlay.style.height = tileSize + "px";
+     overlay.style.pointerEvents = "none";
+     overlay.style.zIndex = "10";
+     
+     const tooltip = document.createElement("div");
+     tooltip.classList.add("tooltip-text");
+     tooltip.innerHTML = `
+          <strong>${building.type}</strong><br>
+          Score: ${building.buildingStats.i_score}<br>
+          Coins: ${building.buildingStats.i_coin}
+     `;
+     
+     overlay.appendChild(tooltip);
+     document.body.appendChild(overlay);
 }
 
 canvas.addEventListener("click", e => {
@@ -154,9 +189,24 @@ canvas.addEventListener("drop", e => {
 
 function placeBuilding(x, y, building) {
      if (coinCount <= 0) return;
-     gameBoard[y][x] = building;
+     
+     const buildingObj = {
+          type: building,
+          buildingStats: { i_score: 0, i_coin: 0 } //indiv stats
+     };
+     gameBoard[y][x] = buildingObj;
+
+     console.log(`Placing ${building} at (${x}, ${y})`);
+
      coinCount--;
      turnCount++;
+     
+     const result = calculateScore(gameBoard, score, coinCount, x, y, building, buildingObj.buildingStats);
+     score = result.score;
+     coinCount = result.coinCount;
+     
+     console.log(`Score after placing ${building} at (${x}, ${y}): ${score}`);
+
      selectedBuilding = null;
      document.querySelectorAll(".choices img").forEach(el => el.classList.remove("selected"));
      document.getElementById("coinCount").textContent = coinCount;
