@@ -31,10 +31,15 @@ function isNextTo(gameBoard, x, y, buildingType) {
 }
 
 function adjacentTo(gameBoard, x, y, buildingType) {
-    // returns true if there is an adjacent building of the specified type connected via roads
+    // adjacent means directly next to the building type specified (UDLR), or connected via a road
+    // returns true if adjacent to the building type specified, false otherwise
 
     if (!gameBoard) {
         return false;
+    }
+
+    if (isNextTo(gameBoard, x, y, buildingType)) {
+        return true; // if next to the building type, no need to check roads
     }
     
     const gridSize = gameBoard.length;
