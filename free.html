@@ -60,5 +60,30 @@
         }
     </script>
 
+    <!-- Tutorial Modal for Free Play -->
+    <div id="tutorialModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <h2 id="tutorialTitle">Welcome</h2>
+        <p id="tutorialText">Welcome to Free Play mode!</p>
+        <div class="modal-actions">
+        <button id="tutorialBackBtn">⬅ Back</button>
+        <button id="tutorialNextBtn">Next ➡</button>
+        </div>
+    </div>
+    </div>
+
+    <!-- Button to trigger tutorial manually -->
+    <button id="tutorialBtn" class="exit-button" style="top: 20px; right: 20px; left: auto;">
+    Tutorial
+    </button>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('tutorial') === 'true' && typeof showTutorial === 'function') {
+            showTutorial();
+            }
+        });
+    </script>
+    <script src="scripts/freeplay_tutorial.js"></script>
 </body>
 </html>
