@@ -61,6 +61,40 @@
      </div>
 
      <script type="module" src="scripts/arcade.js"></script>
+
+     <!-- Tutorial Button -->
+     <button id="tutorialBtn">❓ Tutorial</button>
+
+     <!-- Tutorial Modal -->
+     <div id="tutorialModal">
+          <div id="tutorialContentBox">
+               <h2 id="tutorialTitle"></h2>
+               <p id="tutorialText"></p>
+               <div id="tutorialActions">
+                    <button id="tutorialBackBtn">⬅ Back</button>
+                    <button id="tutorialNextBtn">Next ➡</button>
+               </div>
+          </div>
+     </div>
+
+     <script>
+          window.addEventListener('DOMContentLoaded', () => {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('tutorial') === 'true') {
+               // Use your arcade_tutorial.js's global showTutorial function
+               if (typeof showTutorial === 'function') {
+               showTutorial();
+               } else {
+               // If showTutorial is not defined yet, delay a bit
+               setTimeout(() => {
+                    if (typeof showTutorial === 'function') showTutorial();
+               }, 100);
+               }
+          }
+          });
+     </script>
+     <script src="scripts/arcade_tutorial.js"></script>
+
 </body>
 </html>
 

@@ -280,3 +280,72 @@ h1, h2, p {
      color: #270a5e;
 }
 
+#tutorialBtn {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  background-color: #270a5e;
+  color: white;
+  border: 2px solid #aa78d9;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 9999;
+}
+
+#tutorialBtn:hover {
+  background-color: black;
+  box-shadow: 0 0 12px black;
+}
+
+#tutorialModal {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(15, 4, 36, 0.85);
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(3px);
+}
+
+#tutorialContentBox {
+  background: linear-gradient(145deg, #3c157b, #270a5e);
+  padding: 25px 35px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 420px;
+  color: #fceaff;
+  font-family: 'Orbitron', sans-serif;
+  box-shadow: 0 0 20px #6d3e9e;
+  border: 2px solid #aa78d9;
+}
+
+#tutorialActions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+#tutorialActions button {
+  padding: 10px 18px;
+  font-size: 14px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Orbitron', sans-serif;
+  background-color: #270a5e;
+  color: white;
+  box-shadow: 0 0 8px #270a5e;
+}
+
+#tutorialActions button:hover {
+  background-color: black;
+  box-shadow: 0 0 12px black;
+}
+
+
