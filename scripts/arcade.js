@@ -1,5 +1,8 @@
 ﻿// arcade.js
+import { saveGame } from "./save_game.js";
+import { loadGame } from "./load_saved_game.js";
 import { calculateScore } from "./scoring.js";
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const tileSize = 48;
@@ -19,281 +22,381 @@ let selectedBuilding = null;
 const buildings = ["Residential", "Industry", "Commercial", "Park", "Road"];
 const buildingImages = {};
 
-
-function checkGameOver() {
-     console.log("Coins:", coinCount);
-     if (coinCount <= 0) {
-          console.log("Game Over triggered");
-
-          document.getElementById('finalScore').innerText = score;
-          document.getElementById('finalTurns').innerText = turnCount;
-
-          // Calculate building stats
-          const stats = {};
-          for (const row of gameBoard) {
-               for (const cell of row) {
-                    if (cell) {
-                         const type = typeof cell === "string" ? cell : cell.type;
-                         stats[type] = (stats[type] || 0) + 1;
-                    }
-               }
-          }
-
-          // Generate summary HTML
-          const summaryContainer = document.getElementById("buildingStatsSummary");
-          summaryContainer.innerHTML = "<strong>Buildings Placed:</strong><ul style='padding-left: 20px;'>";
-          for (const [type, count] of Object.entries(stats)) {
-               summaryContainer.innerHTML += `<li>${type}: ${count}</li>`;
-          }
-          summaryContainer.innerHTML += "</ul>";
-
-          const modal = document.getElementById('gameOverModal');
-          modal.classList.remove('hidden');
-          modal.style.display = 'flex'; // Ensure visibility
-     }
+// Convert gameBoard to lightweight format for saving
+function serializeGameBoard(board) {
+    return board.map(row =>
+        row.map(cell => (cell ? cell.type : null))
+    );
 }
 
 
+// Convert saved format back to full gameBoard format
+function deserializeGameBoard(serializedBoard) {
+    return serializedBoard.map(row =>
+        row.map(type => type ? { type: type, buildingStats: { i_score: 0, i_coin: 0 } } : null)
+    );
+}
 
+function checkGameOver() {
+    console.log("Coins:", coinCount);
+    if (coinCount <= 0) {
+        console.log("Game Over triggered");
 
+        document.getElementById('finalScore').innerText = score;
+        document.getElementById('finalTurns').innerText = turnCount;
+
+        // Calculate building stats
+        const stats = {};
+        for (const row of gameBoard) {
+            for (const cell of row) {
+                if (cell) {
+                    const type = typeof cell === "string" ? cell : cell.type;
+                    stats[type] = (stats[type] || 0) + 1;
+                }
+            }
+        }
+
+        // Generate summary HTML
+        const summaryContainer = document.getElementById("buildingStatsSummary");
+        summaryContainer.innerHTML = "<strong>Buildings Placed:</strong><ul style='padding-left: 20px;'>";
+        for (const [type, count] of Object.entries(stats)) {
+            summaryContainer.innerHTML += `<li>${type}: ${count}</li>`;
+        }
+        summaryContainer.innerHTML += "</ul>";
+
+        const modal = document.getElementById('gameOverModal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex'; // Ensure visibility
+    }
+}
+
+// Load all building images asynchronously before using in game
 function loadImages() {
-     buildings.forEach(name => {
-          const img = new Image();
-          img.src = `../assets/${name.toLowerCase()}.png`;
-          buildingImages[name] = img;
-     });
+    // Map over each building type & return array of promises
+    const promises = buildings.map(name => {
+        return new Promise(resolve => {
+            const img = new Image(); // Create new Image object
+
+            // When image loads successfully, resolve promise
+            img.onload = () => resolve();
+
+            // If there's an error loading the image, log it and still resolve the promise
+            img.onerror = () => {
+                console.error(`Failed to load image for ${name}`);
+                resolve(); // Continue even if an image fails to load
+            };
+
+            // Set the image source to the correct asset path
+            img.src = `../assets/${name.toLowerCase()}.png`;
+
+            // Store the image in the buildingImages dictionary for later use
+            buildingImages[name] = img;
+        });
+    });
+
+    // Return Promise that resolves when building image promises are done
+    return Promise.all(promises);
 }
 
 function startNewGame() {
-     gameBoard = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
-     coinCount = 16;
-     turnCount = 1;
-     score = 0;
-     demolishMode = false;
-     selectedBuilding = null;
-     document.getElementById("coinCount").textContent = coinCount;
-     document.getElementById("turnCount").textContent = turnCount;
-     document.getElementById("scoreDisplay").textContent = score;
-     generateBuildingChoices();
-     drawBoard();
+    localStorage.removeItem("ngeeAnnCityGameSave");
+    gameBoard = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
+    coinCount = 16;
+    turnCount = 1;
+    score = 0;
+    demolishMode = false;
+    selectedBuilding = null;
+    document.getElementById("coinCount").textContent = coinCount;
+    document.getElementById("turnCount").textContent = turnCount;
+    document.getElementById("scoreDisplay").textContent = score;
+    generateBuildingChoices();
+    drawBoard();
 }
 const buildingDescriptions = {
-     Residential: "Residential:.",
-     Industry: "Industry:.",
-     Commercial: "Commercial:.",
-     Park: "Park:.dawda",
-     Road: "Road:."
+    Residential: "Residential:.",
+    Industry: "Industry:.",
+    Commercial: "Commercial:.",
+    Park: "Park:.dawda",
+    Road: "Road:."
 };
 
 function getTooltipText(building) {
-     switch (building) {
-          case "Residential":
-               return `Residential: 
+    switch (building) {
+        case "Residential":
+            return `Residential: 
 Scores 1 if next to Industry.
 Otherwise, +1 per adjacent Residential or Commercial, +2 per Park.`;
-          case "Industry":
-               return `Industry: 
+        case "Industry":
+            return `Industry: 
 +1 per Industry in city.
 Generates 1 coin per adjacent Residential.`;
-          case "Commercial":
-               return `Commercial: 
+        case "Commercial":
+            return `Commercial: 
 +1 per adjacent Commercial.
 Generates 1 coin per adjacent Residential.`;
-          case "Park":
-               return `Park: 
+        case "Park":
+            return `Park: 
 +1 per adjacent Park.`;
-          case "Road":
-               return `Road: 
+        case "Road":
+            return `Road: 
 +1 per connected Road in same row.`;
-          default:
-               return "";
-     }
+        default:
+            return "";
+    }
 }
 
 function generateBuildingChoices() {
-     const choiceContainer = document.getElementById("buildingChoices");
-     choiceContainer.innerHTML = "";
-     const choices = [];
-     while (choices.length < 2) {
-          const b = buildings[Math.floor(Math.random() * buildings.length)];
-          choices.push(b);
-     }
-     choices.forEach(building => {
-          const div = document.createElement("div");
-          div.classList.add("tooltip-container");
-          const img = document.createElement("img");
-          img.src = `../assets/${building.toLowerCase()}.png`;
-          img.alt = building;
-          img.draggable = true;
-          img.addEventListener("dragstart", e => {
-               e.dataTransfer.setData("text/plain", building);
-          });
-          img.addEventListener("click", () => {
-               document.querySelectorAll(".choices img").forEach(el => el.classList.remove("selected"));
-               img.classList.add("selected");
-               selectedBuilding = building;
-          });
+    const choiceContainer = document.getElementById("buildingChoices");
+    choiceContainer.innerHTML = "";
+    const choices = [];
+    while (choices.length < 2) {
+        const b = buildings[Math.floor(Math.random() * buildings.length)];
+        choices.push(b);
+    }
+    choices.forEach(building => {
+        const div = document.createElement("div");
+        div.classList.add("tooltip-container");
+        const img = document.createElement("img");
+        img.src = `../assets/${building.toLowerCase()}.png`;
+        img.alt = building;
+        img.draggable = true;
+        img.addEventListener("dragstart", e => {
+            e.dataTransfer.setData("text/plain", building);
+        });
+        img.addEventListener("click", () => {
+            document.querySelectorAll(".choices img").forEach(el => el.classList.remove("selected"));
+            img.classList.add("selected");
+            selectedBuilding = building;
+        });
 
-          const tooltip = document.createElement("div");
-          tooltip.classList.add("tooltip-text");
-          tooltip.innerText = getTooltipText(building);
+        const tooltip = document.createElement("div");
+        tooltip.classList.add("tooltip-text");
+        tooltip.innerText = getTooltipText(building);
 
-          div.appendChild(img);
-          div.appendChild(tooltip);
-          choiceContainer.appendChild(div);
-     });
+        div.appendChild(img);
+        div.appendChild(tooltip);
+        choiceContainer.appendChild(div);
+    });
 }
 
 function drawBoard() {
-     ctx.clearRect(0, 0, canvasSize, canvasSize);
-     
-     const existingOverlays = document.querySelectorAll('.building-stat-overlay');
-     existingOverlays.forEach(overlay => overlay.remove());
-     
-     for (let y = 0; y < gridSize; y++) {
-          for (let x = 0; x < gridSize; x++) {
-               ctx.strokeStyle = "#ccc";
-               ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
-               const cell = gameBoard[y][x];
-               if (cell) {
-                    const buildingType = typeof cell === 'string' ? cell : cell.type;
-                    ctx.drawImage(buildingImages[buildingType], x * tileSize, y * tileSize, tileSize, tileSize);
+    ctx.clearRect(0, 0, canvasSize, canvasSize);
 
-                    // Only create overlay if cell is an object with stats
-                    if (typeof cell === 'object' && cell.buildingStats) {
-                         createBuildingStatsOverlay(x, y, cell);
-                    }
-               }
-          }
-     }
+    const existingOverlays = document.querySelectorAll('.building-stat-overlay');
+    existingOverlays.forEach(overlay => overlay.remove());
+
+    for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+            ctx.strokeStyle = "#ccc";
+            ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+            const cell = gameBoard[y][x];
+            if (cell) {
+                const buildingType = typeof cell === 'string' ? cell : cell.type;
+                ctx.drawImage(buildingImages[buildingType], x * tileSize, y * tileSize, tileSize, tileSize);
+
+                // Only create overlay if cell is an object with stats
+                if (typeof cell === 'object' && cell.buildingStats) {
+                    createBuildingStatsOverlay(x, y, cell);
+                }
+            }
+        }
+    }
 }
 
 function createBuildingStatsOverlay(x, y, building) {
-     const canvasRect = canvas.getBoundingClientRect();
-     
-     const overlay = document.createElement("div");
-     overlay.classList.add("building-stat-overlay", "tooltip-container");
-     overlay.style.position = "absolute";
-     overlay.style.left = (canvasRect.left + window.scrollX + x * tileSize) + "px";
-     overlay.style.top = (canvasRect.top + window.scrollY + y * tileSize) + "px";
-     overlay.style.width = tileSize + "px";
-     overlay.style.height = tileSize + "px";
-     overlay.style.pointerEvents = "none";
-     overlay.style.zIndex = "10";
-     
-     const tooltip = document.createElement("div");
-     tooltip.classList.add("tooltip-text");
-     tooltip.innerHTML = `
+    const canvasRect = canvas.getBoundingClientRect();
+
+    const overlay = document.createElement("div");
+    overlay.classList.add("building-stat-overlay", "tooltip-container");
+    overlay.style.position = "absolute";
+    overlay.style.left = (canvasRect.left + window.scrollX + x * tileSize) + "px";
+    overlay.style.top = (canvasRect.top + window.scrollY + y * tileSize) + "px";
+    overlay.style.width = tileSize + "px";
+    overlay.style.height = tileSize + "px";
+    overlay.style.pointerEvents = "none";
+    overlay.style.zIndex = "10";
+
+    const tooltip = document.createElement("div");
+    tooltip.classList.add("tooltip-text");
+    tooltip.innerHTML = `
           <strong>${building.type}</strong><br>
           Score: ${building.buildingStats.i_score}<br>
           Coins: ${building.buildingStats.i_coin}
      `;
-     
-     overlay.appendChild(tooltip);
-     document.body.appendChild(overlay);
+
+    overlay.appendChild(tooltip);
+    document.body.appendChild(overlay);
 }
 
 canvas.addEventListener("click", e => {
-     const rect = canvas.getBoundingClientRect();
-     const x = Math.floor((e.clientX - rect.left) / tileSize);
-     const y = Math.floor((e.clientY - rect.top) / tileSize);
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / tileSize);
+    const y = Math.floor((e.clientY - rect.top) / tileSize);
 
-     if (demolishMode) {
-          if (gameBoard[y][x] && coinCount > 0) {
-               gameBoard[y][x] = null;
-               coinCount--;
-               document.getElementById("coinCount").textContent = coinCount;
-               drawBoard();
-               checkGameOver()
-          }
-          return;
-     }
+    if (demolishMode) {
+        if (gameBoard[y][x] && coinCount > 0) {
+            gameBoard[y][x] = null;
+            coinCount--;
+            document.getElementById("coinCount").textContent = coinCount;
+            drawBoard();
+            checkGameOver()
+        }
+        return;
+    }
 
-     if (!selectedBuilding || gameBoard[y][x]) return;
-     placeBuilding(x, y, selectedBuilding);
+    if (!selectedBuilding || gameBoard[y][x]) return;
+    placeBuilding(x, y, selectedBuilding);
 });
 
 canvas.addEventListener("dragover", e => e.preventDefault());
 canvas.addEventListener("drop", e => {
-     e.preventDefault();
-     const rect = canvas.getBoundingClientRect();
-     const x = Math.floor((e.clientX - rect.left) / tileSize);
-     const y = Math.floor((e.clientY - rect.top) / tileSize);
-     const droppedBuilding = e.dataTransfer.getData("text/plain");
-     if (!gameBoard[y][x]) {
-          placeBuilding(x, y, droppedBuilding);
-     }
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / tileSize);
+    const y = Math.floor((e.clientY - rect.top) / tileSize);
+    const droppedBuilding = e.dataTransfer.getData("text/plain");
+    if (!gameBoard[y][x]) {
+        placeBuilding(x, y, droppedBuilding);
+    }
 });
 
 function placeBuilding(x, y, building) {
-     if (coinCount <= 0) return;
-     
-     const buildingObj = {
-          type: building,
-          buildingStats: { i_score: 0, i_coin: 0 } //indiv stats
-     };
-     gameBoard[y][x] = buildingObj;
+    if (coinCount <= 0) return;
 
-     console.log(`Placing ${building} at (${x}, ${y})`);
+    const buildingObj = {
+        type: building,
+        buildingStats: { i_score: 0, i_coin: 0 } //indiv stats
+    };
+    gameBoard[y][x] = buildingObj;
 
-     coinCount--;
-     turnCount++;
-     
-     const result = calculateScore(gameBoard, score, coinCount, x, y, building, buildingObj.buildingStats);
-     score = result.score;
-     coinCount = result.coinCount;
-     
-     
-     console.log(`Score after placing ${building} at (${x}, ${y}): ${score}`);
+    console.log(`Placing ${building} at (${x}, ${y})`);
 
-     selectedBuilding = null;
-     document.querySelectorAll(".choices img").forEach(el => el.classList.remove("selected"));
-     document.getElementById("coinCount").textContent = coinCount;
-     document.getElementById("turnCount").textContent = turnCount;
-     document.getElementById("scoreDisplay").textContent = score;
-     generateBuildingChoices();
-     drawBoard();
-     checkGameOver()
+    coinCount--;
+    turnCount++;
+
+    const result = calculateScore(gameBoard, score, coinCount, x, y, building, buildingObj.buildingStats);
+    score = result.score;
+    coinCount = result.coinCount;
+
+
+    console.log(`Score after placing ${building} at (${x}, ${y}): ${score}`);
+
+    selectedBuilding = null;
+    document.querySelectorAll(".choices img").forEach(el => el.classList.remove("selected"));
+    document.getElementById("coinCount").textContent = coinCount;
+    document.getElementById("turnCount").textContent = turnCount;
+    document.getElementById("scoreDisplay").textContent = score;
+    generateBuildingChoices();
+    drawBoard();
+    checkGameOver()
 }
 
+function loadSavedGame() {
+    // Load saved game state from localStorage using loadGame() helper
+    const savedState = loadGame();
 
+    // If no saved game is found, alert the user and stop the function
+    if (!savedState) {
+        alert("No saved game found. Please proceed to Main Menu");
+        return;
+    }
+
+    // Rebuild grid from saved data 
+    gameBoard = deserializeGameBoard(savedState.gameBoard);
+
+    // Restore numeric game values from saved state
+    coinCount = Number(savedState.coinCount);
+    turnCount = Number(savedState.turnCount);
+    score = Number(savedState.score);
+
+    // Update UI to reflect loaded game state
+    document.getElementById("coinCount").textContent = coinCount;
+    document.getElementById("turnCount").textContent = turnCount;
+    document.getElementById("scoreDisplay").textContent = score;
+
+    // Reset selected building so nothing is preselected after loading
+    selectedBuilding = null;
+
+    // Generate new pair of building choices for selection
+    generateBuildingChoices();
+}
+
+// Add click event listener to the "Save Game" button
 document.getElementById("saveGameBtn").addEventListener("click", () => {
-     localStorage.setItem("ngeeAnnGameState", JSON.stringify({ gameBoard, coinCount, turnCount, score }));
+
+    // Convert grid into a lightweight format 
+    const serializedBoard = serializeGameBoard(gameBoard);
+
+    // Create object representing current game state to be saved
+    const gameState = {
+        gameBoard: serializedBoard,  // Serialized version of the 2D grid
+        coinCount,                   // Number of coins remaining
+        turnCount,                   // Current turn number
+        score                        // Player's current score
+    };
+
+    // Save game state to localStorage using helper function
+    saveGame(gameState);
+
+    // Grab Save Game button element
+    const saveBtn = document.getElementById("saveGameBtn");
+
+    // Temporarily change its text to notify user 
+    saveBtn.textContent = "Game Saved!";
+
+    // After 0.5 seconds, revert the button text back to "Save Game"
+    setTimeout(() => {
+        saveBtn.textContent = "Save Game";
+    }, 500); // Delay in milliseconds
 });
 
-document.getElementById("demolishBtn").addEventListener("click", () => {
-     demolishMode = !demolishMode;
-     const btn = document.getElementById("demolishBtn");
-     btn.classList.toggle("active", demolishMode);
-     btn.textContent = `Demolish Mode: ${demolishMode ? "ON" : "OFF"}`;
 
-     if (demolishMode) {
-          document.getElementById("demolishModal").style.display = "flex";
-     }
+document.getElementById("demolishBtn").addEventListener("click", () => {
+    demolishMode = !demolishMode;
+    const btn = document.getElementById("demolishBtn");
+    btn.classList.toggle("active", demolishMode);
+    btn.textContent = `Demolish Mode: ${demolishMode ? "ON" : "OFF"}`;
+
+    if (demolishMode) {
+        document.getElementById("demolishModal").style.display = "flex";
+    }
 });
 
 
 document.getElementById("closeDemolishModal").addEventListener("click", () => {
-     document.getElementById("demolishModal").style.display = "none";
+    document.getElementById("demolishModal").style.display = "none";
 });
 
 
-loadImages();
-startNewGame();
+// Call loadImages(), which returns a Promise that resolves when all building images are loaded.
+// This ensures the images are ready before trying to draw them on the canvas.
+loadImages().then(() => {
 
+
+    // Parse URL parameters from the current browser address bar.
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Check if the URL has a query parameter `load=true`
+    if (urlParams.get("load") === "true") {
+        loadSavedGame(); // Load previously saved game state from localStorage
+        drawBoard()
+    } else {
+        startNewGame(); // Otherwise, begin a fresh new game session
+    }
+});
 
 
 // Exit to Main Menu Modal
 document.getElementById("exitBtn").addEventListener("click", (e) => {
-     e.preventDefault();
-     document.getElementById("exitModal").style.display = "flex";
+    e.preventDefault();
+    document.getElementById("exitModal").style.display = "flex";
 });
 
 document.getElementById("cancelExit").addEventListener("click", () => {
-     document.getElementById("exitModal").style.display = "none";
+    document.getElementById("exitModal").style.display = "none";
 });
 
 document.getElementById("confirmExit").addEventListener("click", () => {
-     window.location.href = "index.html";
+    window.location.href = "index.html";
 });
 
