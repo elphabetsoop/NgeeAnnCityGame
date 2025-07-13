@@ -71,4 +71,5 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('tutorialBtn').addEventListener('click', showTutorial);
   document.getElementById('tutorialNextBtn').addEventListener('click', nextSlide);
   document.getElementById('tutorialBackBtn').addEventListener('click', prevSlide);
+  document.getElementById('tutorialCloseBtn').addEventListener('click', hideTutorial);
 });
