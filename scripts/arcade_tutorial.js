@@ -8,13 +8,46 @@ const slides = [
     content: "First building can be placed anywhere. After that, buildings must connect to existing ones. Unchosen buildings are discarded."
   },
   {
-    title: "Building Types and Scoring",
-    content: "There are 5 building types:\n" +
-             "• Residential (R): Scores 1 point if next to Industry (I). Otherwise, scores 1 point per adjacent Residential (R) or Commercial (C), and 2 points per adjacent Park (O).\n" +
-             "• Industry (I): Scores 1 point per Industry in city and generates 1 coin per adjacent Residential.\n" +
-             "• Commercial (C): Scores 1 point per adjacent Commercial and generates 1 coin per adjacent Residential.\n" +
-             "• Park (O): Scores 1 point per adjacent Park.\n" +
-             "• Road (*): Scores 1 point per connected Road (*) in the same row."
+    title: "Building Types",
+    content: "There are 5 building types:<br>" +
+             "• Residential (R)<br>" +
+             "• Industry (I)<br>" +
+             "• Commercial (C)<br>" +
+             "• Park (O)<br>" +
+             "• Road (*)",
+    image: "assets/arcade/arcade_types_of_building.png"
+  },
+  {
+    title: "Residential Scoring",
+    content: "For Residential (R) buildings:<br>" +
+             "• Scores 1 point if next to Industry (I).<br>" +
+             "• Scores 1 point per adjacent Residential (R) or Commercial (C).<br>" +
+             "• Scores 2 points per adjacent Park (O).",
+    image: "assets/arcade/residential_scoring.png"
+  },
+  {
+    title: "Industry Scoring",
+    content: "For Industry (I) buildings:<br>" +
+             "• Scores 1 point per Industry in city.<br>" +
+             "• Generates 1 coin per adjacent Residential.",
+    image: "assets/arcade/industry_scoring.png"
+  },
+  {
+    title: "Commercial Scoring",
+    content: "For Commercial (C) buildings:<br>" + 
+             "• Scores 1 point per adjacent Commercial" +
+             "• Generates 1 coin per adjacent Residential.",
+    image: "/assets/arcade/commercial_scoring.png"
+  },
+  {
+    title: "Park Scoring",
+    content: "For Park (O) buildings, scores 1 point per adjacent Park.",
+    image: "/assets/arcade/park_scoring.png"
+  },
+  {
+    title: "Road Scoring",
+    content: "For Road (*) buildings, scores 1 point per connected Road (*) in the same row.",
+    image: "/assets/arcade/road_scoring.png"
   },
   {
     title: "Objective",
@@ -25,8 +58,18 @@ const slides = [
 let currentSlide = 0;
 
 function renderSlide() {
-  document.getElementById('tutorialTitle').textContent = slides[currentSlide].title;
-  document.getElementById('tutorialText').textContent = slides[currentSlide].content;
+  const slide = slides[currentSlide];
+
+  document.getElementById('tutorialTitle').textContent = slide.title;
+  document.getElementById('tutorialText').innerHTML = slide.content;
+
+  const imageEl = document.getElementById('tutorialImage');
+  if (slide.image) {
+    imageEl.src = slide.image;
+    imageEl.style.display = 'block';
+  } else {
+    imageEl.style.display = 'none';
+  }
 
   document.getElementById('tutorialBackBtn').style.display = currentSlide === 0 ? 'none' : 'inline-block';
 

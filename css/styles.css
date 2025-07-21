@@ -352,4 +352,11 @@ h1, h2, p {
   position: relative; 
 }
 
+#tutorialText {
+  text-align: left;
+  margin: 12px 0;
+  line-height: 1.5;
+}
+
+
 
