@@ -1,5 +1,6 @@
 // arcade.js
 import { calculateScore } from "./scoring.js";
+import { freeplayUpkeep } from "./scoring.js";
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const tileSize = 48;
@@ -8,13 +9,15 @@ let canvasSize = tileSize * gridSize;
 let expansionCount = 0;
 canvas.width = canvasSize;
 canvas.height = canvasSize;
-let upkeep = 0;
-let profit = 0;
 
 let gameBoard = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
 let coinCount = 16;
 let turnCount = 1;
 let score = 0;
+let upkeep = 0;
+let profit = 0;
+let continuousLosses = 0;
+
 let demolishMode = false;
 let selectedBuilding = null;
 
@@ -23,8 +26,8 @@ const buildingImages = {};
 
 
 function checkGameOver() {
-     console.log("Coins:", coinCount);
-     if (coinCount <= 0) {
+     console.log("Continuous Losses:", continuousLosses);
+     if (continuousLosses >= 20) {
           console.log("Game Over triggered");
 
           document.getElementById('finalScore').innerText = score;
@@ -55,9 +58,6 @@ function checkGameOver() {
      }
 }
 
-
-
-
 function loadImages() {
      buildings.forEach(name => {
           const img = new Image();
@@ -68,7 +68,7 @@ function loadImages() {
 
 function startNewGame() {
      gameBoard = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
-     coinCount = 16;
+     coinCount = Infinity;
      turnCount = 1;
      score = 0;
      demolishMode = false;
@@ -76,6 +76,9 @@ function startNewGame() {
      document.getElementById("coinCount").textContent = "∞";
      document.getElementById("turnCount").textContent = turnCount;
      document.getElementById("scoreDisplay").textContent = score;
+     document.getElementById("currentUpkeep").textContent = upkeep;
+     document.getElementById("currentProfit").textContent = profit;
+     
      generateBuildingChoices();
      drawBoard();
 }
@@ -290,21 +293,33 @@ function placeBuilding(x, y, building) {
      
      const result = calculateScore(gameBoard, score, coinCount, x, y, building, buildingObj.buildingStats);
      score = result.score;
-     coinCount = result.coinCount;
-     
+     //coinCount = result.coinCount;
      
      console.log(`Score after placing ${building} at (${x}, ${y}): ${score}`);
+
+     const upkeepStatus = freeplayUpkeep(gameBoard, profit, upkeep, x, y, building, buildingObj.buildingStats);
+     profit = upkeepStatus.profit;
+     upkeep = upkeepStatus.upkeep;
+
+     console.log(`Profit: ${profit}, Upkeep: ${upkeep}`);
+     if (profit < upkeep) {
+          continuousLosses++;
+          console.log(`Continuous losses: ${continuousLosses}`);
+     } else {
+          continuousLosses = 0; // Reset if profit covers upkeep
+     }
 
      selectedBuilding = null;
      document.querySelectorAll(".choices img").forEach(el => el.classList.remove("selected"));
      document.getElementById("coinCount").textContent = "∞";
      document.getElementById("turnCount").textContent = turnCount;
      document.getElementById("scoreDisplay").textContent = score;
+     document.getElementById("currentUpkeep").textContent = upkeep;
+     document.getElementById("currentProfit").textContent = profit;
      generateBuildingChoices();
      drawBoard();
      checkGameOver()
 }
-
 
 document.getElementById("saveGameBtn").addEventListener("click", () => {
      localStorage.setItem("ngeeAnnGameState", JSON.stringify({ gameBoard, coinCount, turnCount, score }));
@@ -321,16 +336,12 @@ document.getElementById("demolishBtn").addEventListener("click", () => {
      }
 });
 
-
 document.getElementById("closeDemolishModal").addEventListener("click", () => {
      document.getElementById("demolishModal").style.display = "none";
 });
 
-
 loadImages();
 startNewGame();
-
-
 
 // Exit to Main Menu Modal
 document.getElementById("exitBtn").addEventListener("click", (e) => {

@@ -145,9 +145,38 @@ export function calculateScore(gameBoard, score, coinCount, x, y, building, buil
 
 export function freeplayUpkeep(gameBoard, profit, upkeep, x, y, building){
     //profit & upkeep for freeplay mode
+    let hasResidentialCluster = false;
+    let unconnectedRoads = 0;
+    let newProfit = profit;
+    let newUpkeep = upkeep;
 
+    if (building === "Residential") {
+        newProfit++; //each R generates 1 coin per turn
+        if (isNextTo(gameBoard, x, y, "Residential")) {
+            hasResidentialCluster = true;
+        }
+    }
+    else if (building === "Industry") {
+        newProfit += 2; //each I generates 2 coins per turn
+        newUpkeep++; //each I requires 1 coin per turn to upkeep
+    }
+    else if (building === "Commercial") {
+        newProfit += 3; //each C generates 3 coins per turn
+        newUpkeep  += 2; //each C requires 2 coins per turn to upkeep
+    }
+    else if (building === "Park") {
+        newUpkeep++; //each O requires 1 coin to upkeep
+    }
+    else if (building === "Road") {
+        if (!isNextTo(gameBoard, x, y, "Road")) {
+            unconnectedRoads++;
+        }
+    } 
 
-
-
-    return {profit, upkeep}
+    if (hasResidentialCluster)
+        newUpkeep++; //each cluster of R buildings (dir next to) requires 1 coin per turn to upkeep
+    
+    newUpkeep += unconnectedRoads; //each unconnected road segment requires 1 coin per turn to upkeep
+    
+    return { profit: newProfit, upkeep: newUpkeep, unconnectedRoads };
 }
