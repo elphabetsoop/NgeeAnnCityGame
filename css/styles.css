@@ -105,7 +105,7 @@ h1, h2, p {
     color: white;
 }
 
-.game-info {
+.game-info, .coin-info {
     display: flex;
     align-items: center;
     gap: 20px;
@@ -177,6 +177,7 @@ h1, h2, p {
     visibility: visible;
     opacity: 1;
 }
+
 .custom-modal {
      display: none;
      position: fixed;
@@ -322,6 +323,7 @@ h1, h2, p {
   font-family: 'Orbitron', sans-serif;
   box-shadow: 0 0 20px #6d3e9e;
   border: 2px solid #aa78d9;
+  position: relative; 
 }
 
 #tutorialActions {
@@ -348,15 +350,8 @@ h1, h2, p {
   box-shadow: 0 0 12px black;
 }
 
-#tutorialContentBox {
-  position: relative; 
-}
-
 #tutorialText {
   text-align: left;
   margin: 12px 0;
   line-height: 1.5;
 }
-
-
-
