@@ -95,21 +95,32 @@ function getTooltipText(building) {
           case "Residential":
                return `Residential: 
 Scores 1 if next to Industry.
-Otherwise, +1 per adjacent Residential or Commercial, +2 per Park.`;
+Otherwise, +1 per adjacent Residential or Commercial, +2 per Park.
+
+Generates 1 coin per turn.
+Costs 1 coin to upkeep for each cluster of Residential buildings.`;
           case "Industry":
                return `Industry: 
 +1 per Industry in city.
-Generates 1 coin per adjacent Residential.`;
+
+Generates 2 coints per turn.
+Costs 1 coin to upkeep.`;
           case "Commercial":
                return `Commercial: 
-+1 per adjacent Commercial.
++1 per adjacent Commercial
+
+Generates 3 coints per turn.
 Generates 1 coin per adjacent Residential.`;
           case "Park":
                return `Park: 
-+1 per adjacent Park.`;
++1 per adjacent Park.
+
+Costs 1 coin to upkeep.`;
           case "Road":
                return `Road: 
-+1 per connected Road in same row.`;
++1 per connected Road in same row.
+
+Costs 1 coin to upkeep for each unconnected Road.`;
           default:
                return "";
      }
