@@ -14,11 +14,14 @@ npm start
 ├── assets/ # images
 ├── css/
 |    └─ styles.css
-├── scripts/
-|    └─ arcade.js
-|    └─ leaderboard.js
-|    └─ load-save-game.js
-└── src/ # scripts
+|    └─ leaderboard.css
+└─── scripts/
+     └─ arcade.js
+     └─ freeplay.js
+     └─ leaderboard.js
+     └─ load-save-game.js
+     └─ scoring.js
+     └─ *_tutorial.js
 ```
 
 ## References
