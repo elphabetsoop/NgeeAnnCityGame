@@ -154,9 +154,17 @@ function expandGridIfOnEdge(x, y) {
 
 function expandGridFull() {
     const expandBy = 5;
+    const maxGridSize = 25; // Maximum grid size cap
+    
+    // Check if expansion would exceed the maximum size
+    const newGridSize = gridSize + 2 * expandBy;
+    if (newGridSize > maxGridSize) {
+        console.log(`Grid expansion blocked: would exceed maximum size of ${maxGridSize}x${maxGridSize}`);
+        return; // Exit without expanding
+    }
+    
     expansionCount++;
 
-    const newGridSize = gridSize + 2 * expandBy;
     const newBoard = Array.from({ length: newGridSize }, () =>
         Array(newGridSize).fill(null)
     );
