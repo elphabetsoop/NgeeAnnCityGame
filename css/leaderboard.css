@@ -1,21 +1,45 @@
 /* General page styling */
-body {
-  font-family: 'Orbitron', sans-serif;
-  text-align: center;
-  padding: 2em;
-  background-image: url('../assets/landing.png');
-  background-size: cover;           /* Ensures full coverage */
-  background-position: center;      /* Keeps image centered */
-  background-repeat: no-repeat;     /* Prevents tiling */
-  background-attachment: fixed;     /* Optional: adds a parallax effect */
-  color: #fff;
+html, body {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Arial';
+    background: url('../assets/landing.png') no-repeat center center fixed;
+    background-size: cover;
+    color: #fceaff;
+}
+
+h1 {
+    padding: 10px;
+    text-shadow: 1px 1px 3px #6d3e9e;
+}
+
+
+table {
+  margin: 0 auto;
+  border-collapse: collapse;
+  width: 80%;
+  padding: 5px;
+}
+
+th,
+td {
+  border: 1px solid #ccc;
+  padding: 12px;
+}
+
+th {
+  background-color: #f2f2f2;
 }
 
 .leaderboard-container {
   width: 90%;
   max-width: 1000px;
   margin: 0 auto;
-  padding: 24px; /* Equal horizontal and vertical spacing */
+  padding: 24px;
+  /* Equal horizontal and vertical spacing */
   background-color: rgba(0, 0, 0, 0.6);
   border: 2px solid #00ffff;
   border-radius: 16px;
@@ -27,9 +51,10 @@ body {
 /* Table styling */
 .leaderboard-table {
   width: 100%;
-  margin: 0;
+  margin: 0 auto;
   border-collapse: collapse;
-  background-color: rgba(0, 0, 0, 0.3); /* semi-transparent dark bg */
+  background-color: rgba(0, 0, 0, 0.3);
+  /* semi-transparent dark bg */
   box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
   border-radius: 12px;
   overflow: hidden;
@@ -37,15 +62,20 @@ body {
 
 .leaderboard-table th,
 .leaderboard-table td {
-  border: 1px solid white; /* Clean, crisp white lines */
-  box-shadow: none;        /* Remove any glow */
-  background: transparent; /* Prevent background bleed */
-  color: #00ffff;   
+  border: 1px solid white;
+  /* Clean, crisp white lines */
+  box-shadow: none;
+  /* Remove any glow */
+  background: transparent;
+  /* Prevent background bleed */
+  color: #00ffff;
 }
 
 .leaderboard-table th {
-  background-color: rgba(0, 0, 0, 0.7);  /* Match row background */
-  color: #00ffff;                       /* Neon blue */
+  background-color: rgba(0, 0, 0, 0.7);
+  /* Match row background */
+  color: #00ffff;
+  /* Neon blue */
   padding: 1em;
   border: 1px solid #00ffff;
   text-shadow: 0 0 4px #00ffff;
@@ -53,18 +83,21 @@ body {
 }
 
 .leaderboard-entry {
-    border: 1px solid #00ffff;
-    padding: 12px;
-    text-shadow: 0 0 4px #00ffff;
-    background-color: rgba(0, 255, 255, 0.1); /* translucent neon blue */
-    transform: scale(1.02);
-    transition: 0.2s ease;
-    box-shadow: 0 0 8px #00ffff;
+  border: 1px solid #00ffff;
+  padding: 12px;
+  text-shadow: 0 0 4px #00ffff;
+  background-color: rgba(0, 255, 255, 0.1);
+  /* translucent neon blue */
+  transform: scale(1.02);
+  transition: 0.2s ease;
+  box-shadow: 0 0 8px #00ffff;
+  padding: 2px;
 }
 
 .leaderboard-entry:hover {
-    background-color: rgba(0, 0, 0, 0.8); /* almost black with slight transparency */
-    cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.8);
+  /* almost black with slight transparency */
+  cursor: pointer;
 }
 
 /* Toggle buttons */
@@ -72,7 +105,8 @@ body {
   display: flex;
   justify-content: center;
   gap: 16px;
-  margin-bottom: 24px; /* Adjust this to control vertical space */
+  margin-bottom: 24px;
+  /* Adjust this to control vertical space */
 }
 
 .leaderboard-toggle button {
@@ -82,7 +116,6 @@ body {
   padding: 0.6em 1.2em;
   margin: 0 1em;
   font-size: 1em;
-  font-family: 'Orbitron', sans-serif;
   border-radius: 8px;
   transition: all 0.2s ease;
 }
@@ -102,7 +135,6 @@ body {
   border: none;
   border-radius: 8px;
   padding: 10px 14px;
-  font-family: 'Orbitron', sans-serif;
   cursor: pointer;
   box-shadow: 0 0 8px #270a5e;
   transition: 0.3s;
@@ -113,4 +145,3 @@ body {
   box-shadow: 0 0 12px black;
   color: white
 }
-

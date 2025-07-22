@@ -142,3 +142,12 @@ export function calculateScore(gameBoard, score, coinCount, x, y, building, buil
     
     return { score: newScore, coinCount: newCoinCount };
 }
+
+export function freeplayUpkeep(gameBoard, profit, upkeep, x, y, building){
+    //profit & upkeep for freeplay mode
+
+
+
+
+    return {profit, upkeep}
+}
