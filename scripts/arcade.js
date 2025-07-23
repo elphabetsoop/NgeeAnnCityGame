@@ -213,7 +213,7 @@ function createBuildingStatsOverlay(x, y, building) {
     overlay.style.top = (canvasRect.top + window.scrollY + y * tileSize) + "px";
     overlay.style.width = tileSize + "px";
     overlay.style.height = tileSize + "px";
-    overlay.style.pointerEvents = "none";
+    overlay.style.pointerEvents = demolishMode ? "none" : "auto";
     overlay.style.zIndex = "10";
 
     const tooltip = document.createElement("div");
@@ -235,9 +235,21 @@ canvas.addEventListener("click", e => {
 
     if (demolishMode) {
         if (gameBoard[y][x] && coinCount > 0) {
+            const building = gameBoard[y][x];
+            
+            // Subtract the building's individual score and coins from totals
+            if (typeof building === 'object' && building.buildingStats) {
+                score -= building.buildingStats.i_score;
+                coinCount -= building.buildingStats.i_coin;
+                console.log(`Demolished ${building.type} - Score: -${building.buildingStats.i_score}, Coins: -${building.buildingStats.i_coin}`);
+            }
+            
             gameBoard[y][x] = null;
-            coinCount--;
+            coinCount--; // Cost of demolishing
+            
+            // Update UI
             document.getElementById("coinCount").textContent = coinCount;
+            document.getElementById("scoreDisplay").textContent = score;
             drawBoard();
             checkGameOver()
         }
@@ -356,6 +368,12 @@ document.getElementById("demolishBtn").addEventListener("click", () => {
     const btn = document.getElementById("demolishBtn");
     btn.classList.toggle("active", demolishMode);
     btn.textContent = `Demolish Mode: ${demolishMode ? "ON" : "OFF"}`;
+
+    // Update pointer events for all existing overlays
+    const existingOverlays = document.querySelectorAll('.building-stat-overlay');
+    existingOverlays.forEach(overlay => {
+        overlay.style.pointerEvents = demolishMode ? "none" : "auto";
+    });
 
     if (demolishMode) {
         document.getElementById("demolishModal").style.display = "flex";

@@ -71,6 +71,9 @@ function startNewGame() {
      coinCount = 0;
      turnCount = 1;
      score = 0;
+     upkeep = 0;
+     profit = 0;
+     continuousLosses = 0;
      demolishMode = false;
      selectedBuilding = null;
      document.getElementById("coinCount").textContent = "∞";
@@ -78,7 +81,7 @@ function startNewGame() {
      document.getElementById("scoreDisplay").textContent = score;
      document.getElementById("currentUpkeep").textContent = upkeep;
      document.getElementById("currentProfit").textContent = profit;
-     
+
      generateBuildingChoices();
      drawBoard();
 }
@@ -163,54 +166,54 @@ function generateBuildingChoices() {
 }
 
 function expandGridIfOnEdge(x, y) {
-    if (x === 0 || y === 0 || x === gridSize - 1 || y === gridSize - 1) {
-        expandGridFull();
-    }
+     if (x === 0 || y === 0 || x === gridSize - 1 || y === gridSize - 1) {
+          expandGridFull();
+     }
 }
 
 function expandGridFull() {
-    const expandBy = 5;
-    const maxGridSize = 25; // Maximum grid size cap
-    
-    // Check if expansion would exceed the maximum size
-    const newGridSize = gridSize + 2 * expandBy;
-    if (newGridSize > maxGridSize) {
-        console.log(`Grid expansion blocked: would exceed maximum size of ${maxGridSize}x${maxGridSize}`);
-        return; // Exit without expanding
-    }
-    
-    expansionCount++;
+     const expandBy = 5;
+     const maxGridSize = 25; // Maximum grid size cap
 
-    const newBoard = Array.from({ length: newGridSize }, () =>
-        Array(newGridSize).fill(null)
-    );
+     // Check if expansion would exceed the maximum size
+     const newGridSize = gridSize + 2 * expandBy;
+     if (newGridSize > maxGridSize) {
+          console.log(`Grid expansion blocked: would exceed maximum size of ${maxGridSize}x${maxGridSize}`);
+          return; // Exit without expanding
+     }
 
-    // Calculate offset to center old board into new expanded board
-    const offset = expandBy;
+     expansionCount++;
 
-    for (let y = 0; y < gameBoard.length; y++) {
-        for (let x = 0; x < gameBoard[y].length; x++) {
-            newBoard[y + offset][x + offset] = gameBoard[y][x];
-        }
-    }
+     const newBoard = Array.from({ length: newGridSize }, () =>
+          Array(newGridSize).fill(null)
+     );
 
-    gameBoard = newBoard;
-    gridSize = newGridSize;
-    canvasSize = tileSize * gridSize;
-    canvas.width = canvasSize;
-    canvas.height = canvasSize;
+     // Calculate offset to center old board into new expanded board
+     const offset = expandBy;
 
-    console.log(`City expanded to ${gridSize} x ${gridSize}`);
+     for (let y = 0; y < gameBoard.length; y++) {
+          for (let x = 0; x < gameBoard[y].length; x++) {
+               newBoard[y + offset][x + offset] = gameBoard[y][x];
+          }
+     }
+
+     gameBoard = newBoard;
+     gridSize = newGridSize;
+     canvasSize = tileSize * gridSize;
+     canvas.width = canvasSize;
+     canvas.height = canvasSize;
+
+     console.log(`City expanded to ${gridSize} x ${gridSize}`);
 }
 
 
 
 function drawBoard() {
      ctx.clearRect(0, 0, canvasSize, canvasSize);
-     
+
      const existingOverlays = document.querySelectorAll('.building-stat-overlay');
      existingOverlays.forEach(overlay => overlay.remove());
-     
+
      for (let y = 0; y < gridSize; y++) {
           for (let x = 0; x < gridSize; x++) {
                ctx.strokeStyle = "#ccc";
@@ -231,7 +234,7 @@ function drawBoard() {
 
 function createBuildingStatsOverlay(x, y, building) {
      const canvasRect = canvas.getBoundingClientRect();
-     
+
      const overlay = document.createElement("div");
      overlay.classList.add("building-stat-overlay", "tooltip-container");
      overlay.style.position = "absolute";
@@ -239,17 +242,19 @@ function createBuildingStatsOverlay(x, y, building) {
      overlay.style.top = (canvasRect.top + window.scrollY + y * tileSize) + "px";
      overlay.style.width = tileSize + "px";
      overlay.style.height = tileSize + "px";
-     overlay.style.pointerEvents = "none";
+     overlay.style.pointerEvents = demolishMode ? "none" : "auto";
      overlay.style.zIndex = "10";
-     
+
      const tooltip = document.createElement("div");
      tooltip.classList.add("tooltip-text");
      tooltip.innerHTML = `
           <strong>${building.type}</strong><br>
           Score: ${building.buildingStats.i_score}<br>
-          Coins: ${building.buildingStats.i_coin}
+          Coins: ${building.buildingStats.i_coin}<br>
+          Profit: ${building.buildingStats.i_profit}<br>
+          Upkeep: ${building.buildingStats.i_upkeep}
      `;
-     
+
      overlay.appendChild(tooltip);
      document.body.appendChild(overlay);
 }
@@ -262,10 +267,28 @@ canvas.addEventListener("click", e => {
      const y = Math.floor((e.clientY - rect.top) / tileSize);
 
      if (demolishMode) {
-          if (gameBoard[y][x] && coinCount > 0) {
+          if (gameBoard[y][x]) {
+               const building = gameBoard[y][x];
+               
+               // Subtract the building's individual score and coins from totals
+               if (typeof building === 'object' && building.buildingStats) {
+                    score -= building.buildingStats.i_score;
+                    console.log(`Demolished ${building.type} - Score: -${building.buildingStats.i_score}, Coins: -${building.buildingStats.i_coin}`);
+                    
+                    // Reverse the profit and upkeep calculations for this building
+                    profit -= building.buildingStats.i_profit;
+                    profit -= building.buildingStats.i_coin; // Also subtract the coin generation from this building
+                    upkeep -= building.buildingStats.i_upkeep;
+
+                    console.log(`Profit after demolish: ${profit}, Upkeep after demolish: ${upkeep}`);
+               }
+               
                gameBoard[y][x] = null;
-               //coinCount--;
-               //document.getElementById("coinCount").textContent = coinCount;
+               
+               // Update UI
+               document.getElementById("scoreDisplay").textContent = score;
+               document.getElementById("currentUpkeep").textContent = upkeep;
+               document.getElementById("currentProfit").textContent = profit;
                drawBoard();
                checkGameOver()
           }
@@ -274,7 +297,7 @@ canvas.addEventListener("click", e => {
 
      if (!selectedBuilding || gameBoard[y][x]) return;
      placeBuilding(x, y, selectedBuilding);
-     
+
 });
 
 canvas.addEventListener("dragover", e => e.preventDefault());
@@ -292,10 +315,10 @@ canvas.addEventListener("drop", e => {
 
 function placeBuilding(x, y, building) {
      //if (coinCount <= 0) return;
-     
+
      const buildingObj = {
           type: building,
-          buildingStats: { i_score: 0, i_coin: 0 } //indiv stats
+          buildingStats: { i_score: 0, i_coin: 0, i_profit: 0, i_upkeep: 0 } //indiv stats
      };
      gameBoard[y][x] = buildingObj;
      expandGridIfOnEdge(x, y);
@@ -303,10 +326,10 @@ function placeBuilding(x, y, building) {
 
      //coinCount--;
      turnCount++;
-     
+
      const result = calculateScore(gameBoard, score, coinCount, x, y, building, buildingObj.buildingStats);
      score = result.score;
-     
+
      console.log(`Score after placing ${building} at (${x}, ${y}): ${score}`);
 
      const upkeepStatus = freeplayUpkeep(gameBoard, profit, upkeep, x, y, building, buildingObj.buildingStats);
@@ -343,6 +366,12 @@ document.getElementById("demolishBtn").addEventListener("click", () => {
      const btn = document.getElementById("demolishBtn");
      btn.classList.toggle("active", demolishMode);
      btn.textContent = `Demolish Mode: ${demolishMode ? "ON" : "OFF"}`;
+
+     // Update pointer events for all existing overlays
+     const existingOverlays = document.querySelectorAll('.building-stat-overlay');
+     existingOverlays.forEach(overlay => {
+          overlay.style.pointerEvents = demolishMode ? "none" : "auto";
+     });
 
      if (demolishMode) {
           document.getElementById("demolishModal").style.display = "flex";
