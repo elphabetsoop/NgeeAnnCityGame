@@ -11,7 +11,7 @@ canvas.width = canvasSize;
 canvas.height = canvasSize;
 
 let gameBoard = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
-let coinCount = 16;
+let coinCount = 0;
 let turnCount = 1;
 let score = 0;
 let upkeep = 0;
@@ -68,7 +68,7 @@ function loadImages() {
 
 function startNewGame() {
      gameBoard = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
-     coinCount = Infinity;
+     coinCount = 0;
      turnCount = 1;
      score = 0;
      demolishMode = false;
@@ -102,15 +102,17 @@ Costs 1 coin to upkeep for each cluster of Residential buildings.`;
           case "Industry":
                return `Industry: 
 +1 per Industry in city.
+Generates 1 coin per adjacent Residential.
 
-Generates 2 coints per turn.
+Generates 2 coins per turn.
 Costs 1 coin to upkeep.`;
           case "Commercial":
                return `Commercial: 
 +1 per adjacent Commercial
+Generates 1 coin per adjacent Residential.
 
-Generates 3 coints per turn.
-Generates 1 coin per adjacent Residential.`;
+Generates 3 coins per turn.
+Costs 2 coins to upkeep.`;
           case "Park":
                return `Park: 
 +1 per adjacent Park.
@@ -304,12 +306,12 @@ function placeBuilding(x, y, building) {
      
      const result = calculateScore(gameBoard, score, coinCount, x, y, building, buildingObj.buildingStats);
      score = result.score;
-     //coinCount = result.coinCount;
      
      console.log(`Score after placing ${building} at (${x}, ${y}): ${score}`);
 
      const upkeepStatus = freeplayUpkeep(gameBoard, profit, upkeep, x, y, building, buildingObj.buildingStats);
      profit = upkeepStatus.profit;
+     profit += result.coinCount;
      upkeep = upkeepStatus.upkeep;
 
      console.log(`Profit: ${profit}, Upkeep: ${upkeep}`);
