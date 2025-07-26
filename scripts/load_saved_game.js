@@ -24,3 +24,4 @@ export function loadGame(saveKey = "ngeeAnnCityGameSave") {
         return null;
     }
 }
+

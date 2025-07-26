@@ -18,19 +18,17 @@ let turnCount = 1;
 let score = 0;
 let demolishMode = false;
 let selectedBuilding = null;
+let playerName = null;
 
 const buildings = ["Residential", "Industry", "Commercial", "Park", "Road"];
 const buildingImages = {};
 
-// Convert gameBoard to lightweight format for saving
 function serializeGameBoard(board) {
     return board.map(row =>
         row.map(cell => (cell ? cell.type : null))
     );
 }
 
-
-// Convert saved format back to full gameBoard format
 function deserializeGameBoard(serializedBoard) {
     return serializedBoard.map(row =>
         row.map(type => type ? { type: type, buildingStats: { i_score: 0, i_coin: 0 } } : null)
@@ -45,7 +43,6 @@ function checkGameOver() {
         document.getElementById('finalScore').innerText = score;
         document.getElementById('finalTurns').innerText = turnCount;
 
-        // Calculate building stats
         const stats = {};
         for (const row of gameBoard) {
             for (const cell of row) {
@@ -56,7 +53,6 @@ function checkGameOver() {
             }
         }
 
-        // Generate summary HTML
         const summaryContainer = document.getElementById("buildingStatsSummary");
         summaryContainer.innerHTML = "<strong>Buildings Placed:</strong><ul style='padding-left: 20px;'>";
         for (const [type, count] of Object.entries(stats)) {
@@ -66,40 +62,28 @@ function checkGameOver() {
 
         const modal = document.getElementById('gameOverModal');
         modal.classList.remove('hidden');
-        modal.style.display = 'flex'; // Ensure visibility
+        modal.style.display = 'flex';
     }
 }
 
-// Load all building images asynchronously before using in game
 function loadImages() {
-    // Map over each building type & return array of promises
     const promises = buildings.map(name => {
         return new Promise(resolve => {
-            const img = new Image(); // Create new Image object
-
-            // When image loads successfully, resolve promise
+            const img = new Image();
             img.onload = () => resolve();
-
-            // If there's an error loading the image, log it and still resolve the promise
             img.onerror = () => {
                 console.error(`Failed to load image for ${name}`);
-                resolve(); // Continue even if an image fails to load
+                resolve();
             };
-
-            // Set the image source to the correct asset path
             img.src = `../assets/${name.toLowerCase()}.png`;
-
-            // Store the image in the buildingImages dictionary for later use
             buildingImages[name] = img;
         });
     });
-
-    // Return Promise that resolves when building image promises are done
     return Promise.all(promises);
 }
 
 function startNewGame() {
-    localStorage.removeItem("ngeeAnnCityGameSave");
+    localStorage.removeItem(playerName);
     gameBoard = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
     coinCount = 16;
     turnCount = 1;
@@ -112,13 +96,6 @@ function startNewGame() {
     generateBuildingChoices();
     drawBoard();
 }
-const buildingDescriptions = {
-    Residential: "Residential:.",
-    Industry: "Industry:.",
-    Commercial: "Commercial:.",
-    Park: "Park:.dawda",
-    Road: "Road:."
-};
 
 function getTooltipText(building) {
     switch (building) {
@@ -151,11 +128,13 @@ function generateBuildingChoices() {
     const choices = [];
     while (choices.length < 2) {
         const b = buildings[Math.floor(Math.random() * buildings.length)];
-        choices.push(b);
+        if (!choices.includes(b)) choices.push(b);
     }
+
     choices.forEach(building => {
         const div = document.createElement("div");
         div.classList.add("tooltip-container");
+
         const img = document.createElement("img");
         img.src = `../assets/${building.toLowerCase()}.png`;
         img.alt = building;
@@ -181,7 +160,6 @@ function generateBuildingChoices() {
 
 function drawBoard() {
     ctx.clearRect(0, 0, canvasSize, canvasSize);
-
     const existingOverlays = document.querySelectorAll('.building-stat-overlay');
     existingOverlays.forEach(overlay => overlay.remove());
 
@@ -194,7 +172,6 @@ function drawBoard() {
                 const buildingType = typeof cell === 'string' ? cell : cell.type;
                 ctx.drawImage(buildingImages[buildingType], x * tileSize, y * tileSize, tileSize, tileSize);
 
-                // Only create overlay if cell is an object with stats
                 if (typeof cell === 'object' && cell.buildingStats) {
                     createBuildingStatsOverlay(x, y, cell);
                 }
@@ -219,10 +196,10 @@ function createBuildingStatsOverlay(x, y, building) {
     const tooltip = document.createElement("div");
     tooltip.classList.add("tooltip-text");
     tooltip.innerHTML = `
-          <strong>${building.type}</strong><br>
-          Score: ${building.buildingStats.i_score}<br>
-          Coins: ${building.buildingStats.i_coin}
-     `;
+        <strong>${building.type}</strong><br>
+        Score: ${building.buildingStats.i_score}<br>
+        Coins: ${building.buildingStats.i_coin}
+    `;
 
     overlay.appendChild(tooltip);
     document.body.appendChild(overlay);
@@ -236,22 +213,17 @@ canvas.addEventListener("click", e => {
     if (demolishMode) {
         if (gameBoard[y][x] && coinCount > 0) {
             const building = gameBoard[y][x];
-            
-            // Subtract the building's individual score and coins from totals
             if (typeof building === 'object' && building.buildingStats) {
                 score -= building.buildingStats.i_score;
                 coinCount -= building.buildingStats.i_coin;
                 console.log(`Demolished ${building.type} - Score: -${building.buildingStats.i_score}, Coins: -${building.buildingStats.i_coin}`);
             }
-            
             gameBoard[y][x] = null;
-            coinCount--; // Cost of demolishing
-            
-            // Update UI
+            coinCount--;
             document.getElementById("coinCount").textContent = coinCount;
             document.getElementById("scoreDisplay").textContent = score;
             drawBoard();
-            checkGameOver()
+            checkGameOver();
         }
         return;
     }
@@ -277,7 +249,7 @@ function placeBuilding(x, y, building) {
 
     const buildingObj = {
         type: building,
-        buildingStats: { i_score: 0, i_coin: 0 } //indiv stats
+        buildingStats: { i_score: 0, i_coin: 0 }
     };
     gameBoard[y][x] = buildingObj;
 
@@ -290,9 +262,6 @@ function placeBuilding(x, y, building) {
     score = result.score;
     coinCount = result.coinCount;
 
-
-    console.log(`Score after placing ${building} at (${x}, ${y}): ${score}`);
-
     selectedBuilding = null;
     document.querySelectorAll(".choices img").forEach(el => el.classList.remove("selected"));
     document.getElementById("coinCount").textContent = coinCount;
@@ -300,76 +269,52 @@ function placeBuilding(x, y, building) {
     document.getElementById("scoreDisplay").textContent = score;
     generateBuildingChoices();
     drawBoard();
-    checkGameOver()
+    checkGameOver();
 }
 
 function loadSavedGame() {
-    // Load saved game state from localStorage using loadGame() helper
-    const savedState = loadGame();
-
-    // If no saved game is found, alert the user and stop the function
+    const savedState = loadGame(playerName, "arcade");
     if (!savedState) {
-        alert("No saved game found. Please proceed to Main Menu");
+        alert("No saved game found for this player. Please proceed to Main Menu");
         return;
     }
 
-    // Rebuild grid from saved data 
     gameBoard = deserializeGameBoard(savedState.gameBoard);
-
-    // Restore numeric game values from saved state
     coinCount = Number(savedState.coinCount);
     turnCount = Number(savedState.turnCount);
     score = Number(savedState.score);
 
-    // Update UI to reflect loaded game state
     document.getElementById("coinCount").textContent = coinCount;
     document.getElementById("turnCount").textContent = turnCount;
     document.getElementById("scoreDisplay").textContent = score;
-
-    // Reset selected building so nothing is preselected after loading
     selectedBuilding = null;
-
-    // Generate new pair of building choices for selection
     generateBuildingChoices();
+    drawBoard();
 }
 
-// Add click event listener to the "Save Game" button
 document.getElementById("saveGameBtn").addEventListener("click", () => {
-
-    // Convert grid into a lightweight format 
     const serializedBoard = serializeGameBoard(gameBoard);
-
-    // Create object representing current game state to be saved
     const gameState = {
-        gameBoard: serializedBoard,  // Serialized version of the 2D grid
-        coinCount,                   // Number of coins remaining
-        turnCount,                   // Current turn number
-        score                        // Player's current score
+        mode: "arcade",
+        gameBoard: serializedBoard,
+        coinCount,
+        turnCount,
+        score
     };
+    saveGame(gameState, playerName);
 
-    // Save game state to localStorage using helper function
-    saveGame(gameState);
-
-    // Grab Save Game button element
     const saveBtn = document.getElementById("saveGameBtn");
-
-    // Temporarily change its text to notify user 
     saveBtn.textContent = "Game Saved!";
-
-    // After 0.5 seconds, revert the button text back to "Save Game"
     setTimeout(() => {
         saveBtn.textContent = "Save Game";
-    }, 500); // Delay in milliseconds
+    }, 500);
 });
-
 
 document.getElementById("demolishBtn").addEventListener("click", () => {
     demolishMode = !demolishMode;
     const btn = document.getElementById("demolishBtn");
     btn.classList.toggle("active", demolishMode);
     btn.textContent = `Demolish Mode: ${demolishMode ? "ON" : "OFF"}`;
-
-    // Update pointer events for all existing overlays
     const existingOverlays = document.querySelectorAll('.building-stat-overlay');
     existingOverlays.forEach(overlay => {
         overlay.style.pointerEvents = demolishMode ? "none" : "auto";
@@ -380,31 +325,25 @@ document.getElementById("demolishBtn").addEventListener("click", () => {
     }
 });
 
-
 document.getElementById("closeDemolishModal").addEventListener("click", () => {
     document.getElementById("demolishModal").style.display = "none";
 });
 
-
-// Call loadImages(), which returns a Promise that resolves when all building images are loaded.
-// This ensures the images are ready before trying to draw them on the canvas.
 loadImages().then(() => {
-
-
-    // Parse URL parameters from the current browser address bar.
-    const urlParams = new URLSearchParams(window.location.search);
-
-    // Check if the URL has a query parameter `load=true`
-    if (urlParams.get("load") === "true") {
-        loadSavedGame(); // Load previously saved game state from localStorage
-        drawBoard()
-    } else {
-        startNewGame(); // Otherwise, begin a fresh new game session
+    while (!playerName) {
+        playerName = prompt("Enter your player name to begin:");
+        if (!playerName) alert("Player name cannot be empty!");
     }
+
+    if (new URLSearchParams(window.location.search).get("load") === "true") {
+        loadSavedGame();
+    } else {
+        startNewGame();
+    }
+
+    drawBoard();
 });
 
-
-// Exit to Main Menu Modal
 document.getElementById("exitBtn").addEventListener("click", (e) => {
     e.preventDefault();
     document.getElementById("exitModal").style.display = "flex";
