@@ -14,8 +14,8 @@ const slides = [
   },
   {
     title: "Adjacency",
-    content: "Buildings are considered adjacent only if connected by roads.",
-    image: "/assets/freeplay/freeplay_adjacency.png"
+    content: "Buildings are considered adjacent if connected by the same roads, or if they are on the top, bottom, left or right of the building.",
+    image: "/assets/freeplay/adjacency.png"
   },
   {
     title: "Scoring",
