@@ -60,11 +60,27 @@ function checkGameOver() {
         }
         summaryContainer.innerHTML += "</ul>";
 
+        // Automatically use existing playerName
+        const entry = {
+            name: playerName || "Anonymous",
+            score,
+            turnCount,
+            date: new Date().toISOString()
+        };
+
+        const leaderboard = JSON.parse(localStorage.getItem("ngeeAnnCityLeaderboardArcade") || "[]");
+        leaderboard.push(entry);
+        leaderboard.sort((a, b) => b.score - a.score);
+        localStorage.setItem("ngeeAnnCityLeaderboardArcade", JSON.stringify(leaderboard));
+
         const modal = document.getElementById('gameOverModal');
         modal.classList.remove('hidden');
         modal.style.display = 'flex';
     }
 }
+
+
+
 
 function loadImages() {
     const promises = buildings.map(name => {

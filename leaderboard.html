@@ -1,47 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="assets/player.png">
-  <link rel="stylesheet" href="css/leaderboard.css" />
-  <title>Leaderboard</title>
+  <meta charset="UTF-8">
+  <title>Leaderboard | Ngee Ann City</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body {
+      color: #fceaff;
+      font-family: 'Orbitron', sans-serif;
+      padding: 40px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      color: #fff;
+      text-shadow: 2px 2px 5px #6d3e9e;
+    }
+
+    .mode-toggle {
+      margin-bottom: 30px;
+    }
+
+    .mode-toggle button {
+      background-color: #270a5e;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      margin: 0 10px;
+      cursor: pointer;
+      border-radius: 8px;
+      box-shadow: 0 0 8px #6d3e9e;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    .mode-toggle button.active,
+    .mode-toggle button:hover {
+      background-color: #6d3e9e;
+    }
+
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+      width: 80%;
+      max-width: 800px;
+      background-color: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    }
+
+    th, td {
+      padding: 14px;
+      border: 1px solid #aa78d9;
+      color: #fceaff;
+    }
+
+    th {
+      background-color: #3c157b;
+      font-size: 16px;
+    }
+
+    td {
+      font-size: 14px;
+    }
+
+    #no-data {
+      margin-top: 20px;
+      color: #ccc;
+    }
+  </style>
+ <button id="exitBtn" class="exit-button" onclick="window.location.href='index.html'">
+  Exit to Main Menu
+</button>
 </head>
-  
 <body>
-    <button class="exit-button" onclick="goToMainMenu()">Back</button>
-    <h1>Game Leaderboard</h1>
+  <h1>🏆 Leaderboard</h1>
 
-    <!-- Toggle Buttons -->
-    <div class="leaderboard-toggle">
-    <button onclick="showLeaderboard('arcade')">Arcade</button>
-    <button onclick="showLeaderboard('freeplay')">Freeplay</button>
-    </div>
+  <div class="mode-toggle">
+    <button id="arcadeBtn" class="active">Arcade</button>
+    <button id="freeBtn">Free Play</button>
+  </div>
 
-    <div class="leaderboard-container">
-        <!-- Arcade Leaderboard -->
-        <table id="arcade-leaderboard" class="leaderboard-table">
-        <thead>
-            <tr><th>Rank</th><th>Name</th><th>Score</th></tr>
-        </thead>
-        <tbody id="arcade-body"></tbody>
-        </table>
+  <table id="leaderboardTable">
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Player</th>
+        <th>Score</th>
+        <th>Turns</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody id="leaderboardBody"></tbody>
+  </table>
 
-        <!-- Freeplay Leaderboard -->
-        <table id="freeplay-leaderboard" class="leaderboard-table" style="display: none;">
-        <thead>
-            <tr><th>Rank</th><th>Name</th><th>Score</th></tr>
-        </thead>
-        <tbody id="freeplay-body"></tbody>
-        </table>
-    </div>
+  <p id="no-data" style="display: none;">No entries yet for this mode.</p>
+
   <script src="scripts/leaderboard.js"></script>
 </body>
-
-<script>
-  function goToMainMenu() {
-       window.location.href = 'index.html';
-  }
-</script>
-
 </html>

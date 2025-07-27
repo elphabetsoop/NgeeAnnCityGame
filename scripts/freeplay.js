@@ -43,7 +43,6 @@ function deserializeGameBoard(serializedBoard) {
     );
 }
 
-// Checks if the player has lost due to 20 consecutive turns of negative profit
 function checkGameOver() {
     console.log("Continuous Losses:", continuousLosses);
     if (continuousLosses >= 20) {
@@ -52,7 +51,6 @@ function checkGameOver() {
         document.getElementById('finalScore').innerText = score;
         document.getElementById('finalTurns').innerText = turnCount;
 
-        // Calculate building stats
         const stats = {};
         for (const row of gameBoard) {
             for (const cell of row) {
@@ -63,7 +61,6 @@ function checkGameOver() {
             }
         }
 
-        // Generate summary HTML
         const summaryContainer = document.getElementById("buildingStatsSummary");
         summaryContainer.innerHTML = "<strong>Buildings Placed:</strong><ul style='padding-left: 20px;'>";
         for (const [type, count] of Object.entries(stats)) {
@@ -71,11 +68,26 @@ function checkGameOver() {
         }
         summaryContainer.innerHTML += "</ul>";
 
+        // Automatically use existing playerName
+        const entry = {
+            name: playerName || "Anonymous",
+            score,
+            turnCount,
+            date: new Date().toISOString()
+        };
+
+        const leaderboard = JSON.parse(localStorage.getItem("ngeeAnnCityLeaderboardFree") || "[]");
+        leaderboard.push(entry);
+        leaderboard.sort((a, b) => b.score - a.score);
+        localStorage.setItem("ngeeAnnCityLeaderboardFree", JSON.stringify(leaderboard));
+
         const modal = document.getElementById('gameOverModal');
         modal.classList.remove('hidden');
-        modal.style.display = 'flex'; // Ensure visibility
+        modal.style.display = 'flex';
     }
 }
+
+
 
 // Loads all building images into memory for rendering on the board
 function loadImages() {

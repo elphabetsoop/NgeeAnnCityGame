@@ -1,19 +1,27 @@
-// save_game.js
-// Exported function to save game state into browser's localStorage
 export function saveGame(gameState, saveKey = "ngeeAnnCityGameSave") {
     try {
-        // Convert the gameState object into JSON string to be stored in localStorage
+        // Save latest game state as a snapshot
         const serializedState = JSON.stringify(gameState);
-
-        // Save the serialized state under the specified key in localStorage
         localStorage.setItem(saveKey, serializedState);
 
-        // Log success and the actual game state for debugging purposes
-        console.log("Game saved:", gameState);
-    } catch (error) {
+        // --- Append to leaderboard ---
+        const leaderboardKey = "ngeeAnnCityLeaderboard";
+        let leaderboard = JSON.parse(localStorage.getItem(leaderboardKey)) || [];
 
-        // Ccatch & report the error without crashing the game
+        // Add timestamp and optionally playerName (you can set it beforehand)
+        gameState.date = new Date().toISOString();
+
+        leaderboard.push(gameState);
+
+        // Optional: Sort by score descending and limit to top 10
+        leaderboard.sort((a, b) => b.score - a.score);
+        leaderboard = leaderboard.slice(0, 10);
+
+        // Save updated leaderboard
+        localStorage.setItem(leaderboardKey, JSON.stringify(leaderboard));
+
+        console.log("Game and leaderboard saved:", gameState);
+    } catch (error) {
         console.error("Failed to save game:", error);
     }
 }
-
