@@ -11,8 +11,12 @@ export function loadGame(saveKey = "ngeeAnnCityGameSave") {
         // Retrieve saved game state from localStorage using saveKey
         const serializedState = localStorage.getItem(saveKey);
 
-        // If there's nothing saved under that key, return null
-        if (!serializedState) return null;
+        // If there's nothing saved under that key, redirect to index.html
+        if (!serializedState) {
+            console.warn("No saved game found. Redirecting to index.html...");
+            window.location.href = "index.html";
+            return null;
+        }
 
         // Parse the JSON string back into JS object
         return JSON.parse(serializedState);
@@ -20,8 +24,10 @@ export function loadGame(saveKey = "ngeeAnnCityGameSave") {
         // If an error occurs during loading or parsing, log the error for debugging
         console.error("Failed to load game:", error);
 
-        // Return null when game state cannot be loaded
+        // Redirect to index.html if parsing/loading fails
+        window.location.href = "index.html";
         return null;
     }
 }
+
 
