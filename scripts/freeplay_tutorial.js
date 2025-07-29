@@ -61,7 +61,7 @@ const slides = [
   },
   {
     title: "Objective",
-    content: "Design and grow your city while maintaining a positive coin flow!"
+       content: "Design and grow your city while maintaining a positive coin flow!" 
   }
 ];
 
