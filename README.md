@@ -32,4 +32,3 @@ npm start
   <li><a href="https://www.flaticon.com/free-icons/urban" title="urban icons">Urban icons</a> created by smalllikeart - Flaticon</li>
   <li><a href="https://www.flaticon.com/free-icons/factory" title="factory icons">Factory icons</a> created by Freepik - Flaticon</li>
 </ul>
-
