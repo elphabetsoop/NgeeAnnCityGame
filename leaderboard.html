@@ -1,102 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Leaderboard | NgeeAnnCityGame</title>
-      <link rel="icon" href="assets/player.png">
-  <link rel="stylesheet" href="css/styles.css">
-  <style>
-    body {
-      color: #fceaff;
-      font-family: 'Orbitron', sans-serif;
-      padding: 40px;
-      text-align: center;
-    }
+     <meta charset="UTF-8">
+     <title>Leaderboard | NgeeAnnCityGame</title>
 
-    h1 {
-      margin-bottom: 30px;
-      color: #fff;
-      text-shadow: 2px 2px 5px #6d3e9e;
-    }
+     <!-- Favicon -->
+     <link rel="icon" href="assets/player.png">
 
-    .mode-toggle {
-      margin-bottom: 30px;
-    }
+     <!-- External CSS for overall styling -->
+     <link rel="stylesheet" href="css/styles.css">
 
-    .mode-toggle button {
-      background-color: #270a5e;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      margin: 0 10px;
-      cursor: pointer;
-      border-radius: 8px;
-      box-shadow: 0 0 8px #6d3e9e;
-      font-size: 16px;
-      transition: 0.3s;
-    }
+     <!-- Internal CSS specific to leaderboard page -->
+     <style>
+          /* Body styles: font, color, padding, center alignment */
+          body {
+               color: #fceaff;
+               font-family: 'Orbitron', sans-serif;
+               padding: 40px;
+               text-align: center;
+          }
 
-    .mode-toggle button.active,
-    .mode-toggle button:hover {
-      background-color: #6d3e9e;
-    }
+          /* Main heading styles */
+          h1 {
+               margin-bottom: 30px;
+               color: #fff;
+               text-shadow: 2px 2px 5px #6d3e9e;
+          }
 
-    table {
-      margin: 0 auto;
-      border-collapse: collapse;
-      width: 80%;
-      max-width: 800px;
-      background-color: rgba(255, 255, 255, 0.05);
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-    }
+          /* Container for mode toggle buttons */
+          .mode-toggle {
+               margin-bottom: 30px;
+          }
 
-    th, td {
-      padding: 14px;
-      border: 1px solid #aa78d9;
-      color: #fceaff;
-    }
+               /* Style for mode toggle buttons */
+               .mode-toggle button {
+                    background-color: #270a5e;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    margin: 0 10px;
+                    cursor: pointer;
+                    border-radius: 8px;
+                    box-shadow: 0 0 8px #6d3e9e;
+                    font-size: 16px;
+                    transition: 0.3s;
+               }
 
-    th {
-      background-color: #3c157b;
-      font-size: 16px;
-    }
+                    /* Active or hovered button state */
+                    .mode-toggle button.active,
+                    .mode-toggle button:hover {
+                         background-color: #6d3e9e;
+                    }
 
-    td {
-      font-size: 14px;
-    }
+          /* Leaderboard table container styles */
+          table {
+               margin: 0 auto;
+               border-collapse: collapse;
+               width: 80%;
+               max-width: 800px;
+               background-color: rgba(255, 255, 255, 0.05);
+               box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+          }
 
-    #no-data {
-      margin-top: 20px;
-      color: #ccc;
-    }
-  </style>
- <button id="exitBtn" class="exit-button" onclick="window.location.href='index.html'">
-  Exit to Main Menu
-</button>
+          /* Table header and cell styles */
+          th, td {
+               padding: 14px;
+               border: 1px solid #aa78d9;
+               color: #fceaff;
+          }
+
+          /* Header row specific styles */
+          th {
+               background-color: #3c157b;
+               font-size: 16px;
+          }
+
+          /* Data cells font size */
+          td {
+               font-size: 14px;
+          }
+
+          /* Message shown when no leaderboard entries exist */
+          #no-data {
+               margin-top: 20px;
+               color: #ccc;
+          }
+     </style>
+
+     <!-- Exit button to return to the main menu -->
+     <button id="exitBtn" class="exit-button" onclick="window.location.href='index.html'">
+          Exit to Main Menu
+     </button>
 </head>
 <body>
-  <h1>🏆 Leaderboard</h1>
+     <!-- Page Title -->
+     <h1>🏆 Leaderboard</h1>
 
-  <div class="mode-toggle">
-    <button id="arcadeBtn" class="active">Arcade</button>
-    <button id="freeBtn">Free Play</button>
-  </div>
+     <!-- Mode toggle buttons: switch between Arcade and Free Play leaderboards -->
+     <div class="mode-toggle">
+          <button id="arcadeBtn" class="active">Arcade</button>
+          <button id="freeBtn">Free Play</button>
+     </div>
 
-  <table id="leaderboardTable">
-    <thead>
-      <tr>
-        <th>Rank</th>
-        <th>Player</th>
-        <th>Score</th>
-        <th>Turns</th>
-        <th>Date</th>
-      </tr>
-    </thead>
-    <tbody id="leaderboardBody"></tbody>
-  </table>
+     <!-- Leaderboard table to display top scores -->
+     <table id="leaderboardTable">
+          <thead>
+               <tr>
+                    <th>Rank</th>       <!-- Player's rank in the leaderboard -->
+                    <th>Player</th>     <!-- Player's name -->
+                    <th>Score</th>      <!-- Player's score -->
+                    <th>Turns</th>      <!-- Number of turns taken -->
+                    <th>Date</th>       <!-- Date of the score entry -->
+               </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+               <!-- JavaScript dynamically inserts leaderboard rows here -->
+          </tbody>
+     </table>
 
-  <p id="no-data" style="display: none;">No entries yet for this mode.</p>
+     <!-- Message displayed when there are no entries for the selected mode -->
+     <p id="no-data" style="display: none;">No entries yet for this mode.</p>
 
-  <script src="scripts/leaderboard.js"></script>
+     <!-- External JavaScript to handle loading and toggling leaderboard data -->
+     <script src="scripts/leaderboard.js"></script>
 </body>
 </html>

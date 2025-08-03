@@ -4,40 +4,69 @@
      <meta charset="UTF-8">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <title>NgeeAnnCityGame</title>
+
+     <!-- Favicon -->
      <link rel="icon" href="assets/player.png">
+
+     <!-- Bootstrap JS (for responsive layout and button groups) -->
      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
              integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
              crossorigin="anonymous"></script>
+
+     <!-- Bootstrap CSS -->
      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
            integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+
+     <!-- Custom CSS -->
      <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="d-flex align-items-center justify-content-center vh-100" style="background-image: url('assets/landing.png');">
-     <!-- Background Music -->
+     <!-- =======================
+          Background Music Element
+          ======================= -->
      <audio id="bgMusic" loop preload="auto">
           <source src="assets/Building-The-Future(chosic.com).mp3" type="audio/mpeg">
           Your browser does not support the audio element.
      </audio>
-    <img src="assets/player.png" alt="Player" id="movingPlayer" class="moving-player">
- 
 
-     <!-- Audio Controls -->
+     <!-- ===================
+          Animated Player Icon
+          =================== -->
+     <img src="assets/player.png" alt="Player" id="movingPlayer" class="moving-player">
+
+     <!-- ============================
+          Audio Toggle and Volume Slider
+          ============================ -->
      <div class="audio-controls">
           <button class="audio-btn" id="toggleMusic">🔊 Music On</button>
           <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
      </div>
 
+     <!-- ===================
+          Main Menu Buttons
+          =================== -->
      <div class="text-center">
-          <h1 class="mb-4" style="font-size: 3rem; color:#2D2D2D ">NgeeAnnCityGame</h1>
+          <h1 class="mb-4" style="font-size: 3rem; color:#2D2D2D">NgeeAnnCityGame</h1>
           <div class="d-grid gap-3 width-3" role="group" aria-label="Large button group">
+               <!-- Arcade mode with tutorial enabled -->
                <a class="btn btn-custom btn-lg" href="arcade.html?tutorial=true">Start New Arcade Game</a>
+               <!-- Free play mode with tutorial enabled -->
                <a class="btn btn-custom btn-lg" href="free.html?tutorial=true">Start New Free Play Game</a>
+               <!-- Load saved game based on saved data -->
                <button class="btn btn-custom btn-lg" id="loadGameBtn">Load Saved Game</button>
+               <!-- View leaderboard -->
                <a class="btn btn-custom btn-lg" href="leaderboard.html">Display Leaderboard</a>
           </div>
      </div>
+
+     <!-- ===================
+          JavaScript Logic
+          =================== -->
      <script>
-          // Audio Management
+          // ==========================
+          // Audio Playback Management
+          // ==========================
+
           const bgMusic = document.getElementById('bgMusic');
           const toggleButton = document.getElementById('toggleMusic');
           const volumeSlider = document.getElementById('volumeSlider');
@@ -46,7 +75,7 @@
           // Set initial volume
           bgMusic.volume = 0.5;
 
-          // Function to start music (requires user interaction)
+          // Play music when user interacts for the first time
           function startMusic() {
                if (!musicEnabled) {
                     bgMusic.play().then(() => {
@@ -59,7 +88,7 @@
                }
           }
 
-          // Toggle music on/off
+          // Toggle music play/pause
           toggleButton.addEventListener('click', () => {
                if (!musicEnabled) {
                     startMusic();
@@ -76,25 +105,27 @@
                }
           });
 
-          // Volume control
+          // Volume control via slider
           volumeSlider.addEventListener('input', (e) => {
                bgMusic.volume = e.target.value / 100;
           });
 
-          // Auto-start music when user interacts with any button
+          // Auto-enable music on any user interaction (once)
           document.addEventListener('click', () => {
                if (!musicEnabled) {
                     startMusic();
                }
           }, { once: true });
 
-          // Save music preferences
+          // ============================
+          // Persisting Music Preferences
+          // ============================
+
           function saveMusicPreferences() {
                localStorage.setItem('musicVolume', bgMusic.volume);
                localStorage.setItem('musicEnabled', !bgMusic.paused);
           }
 
-          // Load music preferences
           function loadMusicPreferences() {
                const savedVolume = localStorage.getItem('musicVolume');
                const savedEnabled = localStorage.getItem('musicEnabled');
@@ -105,15 +136,19 @@
                }
           }
 
-          // Load preferences on page load
+          // Load on page start
           loadMusicPreferences();
 
-          // Save preferences before page unload
+          // Save before leaving page
           window.addEventListener('beforeunload', saveMusicPreferences);
 
-          // Load Game functionality
+          // ==========================
+          // Load Game from LocalStorage
+          // ==========================
+
           document.getElementById("loadGameBtn").addEventListener("click", () => {
                const allKeys = Object.keys(localStorage);
+
                const hasFreeplaySave = allKeys.some(key => {
                     try {
                          const data = JSON.parse(localStorage.getItem(key));
@@ -122,6 +157,7 @@
                          return false;
                     }
                });
+
                const hasArcadeSave = allKeys.some(key => {
                     try {
                          const data = JSON.parse(localStorage.getItem(key));
@@ -130,6 +166,8 @@
                          return false;
                     }
                });
+
+               // Redirect based on which saved mode exists
                if (hasFreeplaySave) {
                     window.location.href = "free.html?load=true";
                } else if (hasArcadeSave) {

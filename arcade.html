@@ -3,26 +3,32 @@
 <head>
      <meta charset="UTF-8">
      <title>Arcade Mode | NgeeAnnCityGame</title>
+     <!-- Favicon for browser tab -->
      <link rel="icon" href="assets/player.png">
+     <!-- External CSS for styling -->
      <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-     <!-- Game Over Modal -->
+
+     <!-- Game Over Modal: Appears when the player runs out of coins -->
      <div id="gameOverModal" class="custom-modal hidden">
           <div class="custom-modal-content">
                <h2>🏁 Game Over</h2>
                <p>You have run out of coins</p>
                <p>Your final score: <span id="finalScore">0</span></p>
                <p>Total turns taken: <span id="finalTurns">0</span></p>
+               <!-- Dynamic building stats summary goes here -->
                <div id="buildingStatsSummary" style="margin: 15px 0; text-align: left;"></div>
                <div class="modal-actions">
+                    <!-- Restart Arcade mode -->
                     <button onclick="window.location.href='arcade.html'">🔄 Play Again</button>
+                    <!-- Return to Main Menu -->
                     <button onclick="window.location.href='index.html'" class="btn-custom">🏠 Main Menu</button>
                </div>
           </div>
      </div>
 
-     <!-- Demolish Reminder Modal -->
+     <!-- Demolish Reminder Modal: Explains coin penalty when demolish mode is active -->
      <div id="demolishModal" class="custom-modal">
           <div class="custom-modal-content">
                <p>🚧 <strong>Demolish Mode is ON</strong></p>
@@ -32,7 +38,7 @@
           </div>
      </div>
 
-     <!-- Exit Confirmation Modal -->
+     <!-- Exit Confirmation Modal: Confirms if the player wants to exit mid-game -->
      <div id="exitModal" class="custom-modal">
           <div class="custom-modal-content">
                <p>⚠️ <strong>Are you sure you want to exit to the main menu?</strong></p>
@@ -45,35 +51,56 @@
      </div>
 
      <!-- Main Game Interface -->
+     <!-- Exit Button (always visible) -->
      <button id="exitBtn" class="exit-button">Exit to Main Menu</button>
+
      <div class="main-wrapper">
+          <!-- Page Header -->
           <h1>Ngee Ann City - Arcade Mode</h1>
+
+          <!-- Coin Counter -->
           <p>Coins: <span id="coinCount">16</span></p>
+
+          <!-- Game Info Section: Turn, Score, Save, Demolish -->
           <div class="game-info">
                <p>Turn: <span id="turnCount">1</span></p>
                <p>Score: <span id="scoreDisplay">0</span></p>
                <button id="saveGameBtn" class="save-button">Save Game</button>
                <button id="demolishBtn" class="demolish-button">Demolish Mode: OFF</button>
           </div>
+
+          <!-- Game Canvas: 20x20 Grid Display -->
           <div class="canvas-container">
                <canvas id="gameCanvas" width="960" height="960"></canvas>
           </div>
+
+          <!-- Building Choices for the Current Turn -->
           <h2>Choose a Building</h2>
           <div id="buildingChoices" class="choices"></div>
      </div>
 
+     <!-- Main Arcade Game Logic -->
      <script type="module" src="scripts/arcade.js"></script>
 
-     <!-- Tutorial Button -->
+     <!-- Tutorial Button (can be clicked anytime) -->
      <button id="tutorialBtn">❓ Tutorial</button>
 
-     <!-- Tutorial Modal -->
+     <!-- Tutorial Modal for Step-by-step Instructions -->
      <div id="tutorialModal">
           <div id="tutorialContentBox">
+               <!-- Close Button for Tutorial -->
                <img id="tutorialCloseBtn" src="assets/close-button.png" alt="Close" style="position: absolute; top: 20px; right: 20px; width: 18px; height: 18px; cursor: pointer;">
+
+               <!-- Dynamic Tutorial Title -->
                <h2 id="tutorialTitle"></h2>
+
+               <!-- Optional Image for Each Step -->
                <img id="tutorialImage" src="" alt="Tutorial Image" style="max-width: 100%; height: auto; border-radius: 10px; margin: 12px 0; display: none;">
+
+               <!-- Tutorial Text -->
                <p id="tutorialText"></p>
+
+               <!-- Navigation Buttons -->
                <div id="tutorialActions">
                     <button id="tutorialBackBtn">⬅ Back</button>
                     <button id="tutorialNextBtn">Next ➡</button>
@@ -81,31 +108,26 @@
           </div>
      </div>
 
+     <!-- Auto-launch Tutorial if URL contains ?tutorial=true -->
      <script>
           window.addEventListener('DOMContentLoaded', () => {
-          const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('tutorial') === 'true') {
-               // Use your arcade_tutorial.js's global showTutorial function
-               if (typeof showTutorial === 'function') {
-               showTutorial();
-               } else {
-               // If showTutorial is not defined yet, delay a bit
-               setTimeout(() => {
-                    if (typeof showTutorial === 'function') showTutorial();
-               }, 100);
+               const urlParams = new URLSearchParams(window.location.search);
+               if (urlParams.get('tutorial') === 'true') {
+                    // Check if showTutorial() is already available
+                    if (typeof showTutorial === 'function') {
+                         showTutorial();
+                    } else {
+                         // If not, wait briefly and try again
+                         setTimeout(() => {
+                              if (typeof showTutorial === 'function') showTutorial();
+                         }, 100);
+                    }
                }
-          }
           });
      </script>
+
+     <!-- Tutorial Logic -->
      <script src="scripts/arcade_tutorial.js"></script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
